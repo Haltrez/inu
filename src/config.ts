@@ -53,10 +53,10 @@ export const CONFIG = {
   model: str("ANTHROPIC_MODEL", "claude-opus-5-5"),
   effort: effort("ANTHROPIC_EFFORT", "high"),
 
-  // Optional ISO timestamp the round cycle is anchored to. Empty = epoch
-  // (verdicts land on :00/:30). Set it to the launch moment to restart the
-  // countdown at a full round from that instant.
-  roundAnchor: str("ROUND_ANCHOR", ""),
+  // ISO timestamp the round cycle is anchored to: verdicts land at
+  // anchor + n * ROUND_MINUTES. Defaults to the $REASONS launch reset;
+  // override with ROUND_ANCHOR. Empty string = epoch (:00/:30 verdicts).
+  roundAnchor: str("ROUND_ANCHOR", "2026-09-30T20:54:00Z"),
 
   dbPath: str("DB_PATH", "data/reasons.db"),
 };
