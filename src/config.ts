@@ -56,7 +56,7 @@ export const CONFIG = {
   // ISO timestamp the round cycle is anchored to: verdicts land at
   // anchor + n * ROUND_MINUTES. Defaults to the $REASONS launch reset;
   // override with ROUND_ANCHOR. Empty string = epoch (:00/:30 verdicts).
-  roundAnchor: str("ROUND_ANCHOR", "2026-09-30T20:54:00Z"),
+  roundAnchor: str("ROUND_ANCHOR", "2026-09-30T20:49:00Z"),
 
   dbPath: str("DB_PATH", "data/reasons.db"),
 };
