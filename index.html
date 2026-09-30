@@ -163,8 +163,35 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   opacity:.8; margin-top:-6px}
 @media (min-width:960px){ .rail{display:flex} }
 
-/* phone fallback for the rails: one slim next-up strip */
-.nextup{display:none; grid-template-columns:1fr 1fr; gap:8px}
+/* mobile drawer holding the full flight plan */
+.drawer-back{position:fixed; inset:0; z-index:4; background:rgba(2,4,12,.65);
+  opacity:0; pointer-events:none; transition:opacity .25s}
+.drawer-back.open{opacity:1; pointer-events:auto}
+.drawer{position:fixed; top:0; right:0; bottom:0; z-index:5; width:min(340px,88vw);
+  background:rgba(7,11,30,.97); border-left:1px solid var(--line);
+  transform:translateX(103%); visibility:hidden;
+  transition:transform .28s ease, visibility .28s;
+  display:flex; flex-direction:column; gap:16px; overflow-y:auto;
+  padding:calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.drawer.open{transform:none; visibility:visible}
+.dhead{display:flex; align-items:center; justify-content:space-between;
+  font-family:var(--display); font-size:14px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--hot)}
+.dhead button{background:none; border:1px solid var(--line); border-radius:8px;
+  color:var(--ink); width:34px; height:34px; font-size:14px; cursor:pointer; flex:none}
+.dcols{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start}
+.rail.static{display:flex; position:static; transform:none; width:auto; pointer-events:auto}
+@media (prefers-reduced-motion:reduce){
+  .drawer{transition:none} .drawer-back{transition:none}
+}
+
+/* phone fallback for the rails: a slim next-up strip that opens the flight plan */
+.nextup{display:none; grid-template-columns:1fr 1fr auto; gap:8px; align-items:stretch;
+  background:none; border:0; padding:0; font:inherit; color:inherit; text-align:left;
+  cursor:pointer; width:100%}
+.nextup .chev{display:flex; align-items:center; color:var(--dim); font-size:20px;
+  padding-inline:2px}
 .nu{border:1px solid var(--line); border-radius:9px; padding:5px 10px;
   display:flex; flex-direction:column; gap:0; min-width:0; background:rgba(4,6,19,.45)}
 .nul{font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--dim);
@@ -211,10 +238,11 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   </main>
 
   <section class="console" aria-label="Flight telemetry">
-    <div class="nextup">
-      <div class="nu"><span class="nul">Next target</span><span class="nuv" id="nuTarget">—</span></div>
-      <div class="nu"><span class="nul">Next reward</span><span class="nuv" id="nuReward">—</span></div>
-    </div>
+    <button class="nextup" id="drawerBtn" type="button" aria-expanded="false" aria-controls="drawer">
+      <span class="nu"><span class="nul">Next target</span><span class="nuv" id="nuTarget">—</span></span>
+      <span class="nu"><span class="nul">Next reward</span><span class="nuv" id="nuReward">—</span></span>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
+    </button>
     <div class="stats">
       <div class="stat"><span class="lbl">Velocity</span><span class="val" id="velVal">1.0&times;</span></div>
       <div class="stat"><span class="lbl">Altitude</span><span class="val" id="altVal">0 km</span></div>
@@ -241,6 +269,22 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   <div class="rt">Rewards</div>
   <div class="rnote">updated as we fly</div>
   <ul id="rewardList"></ul>
+</aside>
+
+<div class="drawer-back" id="drawerBack"></div>
+<aside class="drawer" id="drawer" aria-label="Flight plan">
+  <div class="dhead"><span>Flight plan</span><button id="drawerClose" type="button" aria-label="Close">&#10005;</button></div>
+  <div class="dcols">
+    <div class="rail left static">
+      <div class="rt">Rewards</div>
+      <div class="rnote">updated as we fly</div>
+      <ul id="rewardList2"></ul>
+    </div>
+    <div class="rail static">
+      <div class="rt">Targets</div>
+      <ul id="railList2"></ul>
+    </div>
+  </div>
 </aside>
 
 <script>
@@ -309,23 +353,39 @@ const ALT_EPOCH = CONFIG.LAUNCH_TS ? Date.parse(CONFIG.LAUNCH_TS) : Date.now();
 const ALT_K = 15;                         // km/s of climb per 1x velocity
 function altTargetNow(s){ return s * ALT_K * Math.max(0, (Date.now() - ALT_EPOCH)/1000); }
 
-/* milestones rail */
-const railList = $('railList');
-for(const [km, nm, pk] of MILESTONES){
-  const li = document.createElement('li');
-  li.innerHTML = '<span class="mname">' + nm + '</span><span class="mkm">' + pk + ' </span><span class="prog" hidden></span>';
-  railList.appendChild(li);
+/* target + reward ladders (rendered twice: side rails on desktop, drawer on mobile) */
+const railList = $('railList'), railList2 = $('railList2');
+const rewardList = $('rewardList'), rewardList2 = $('rewardList2');
+function buildTargets(list){
+  for(const [km, nm, pk] of MILESTONES){
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="mname">' + nm + '</span><span class="mkm">' + pk + ' </span><span class="prog" hidden></span>';
+    list.appendChild(li);
+  }
 }
-/* rewards rail */
-const rewardList = $('rewardList');
-for(const [km, label] of REWARDS){
-  const ms = MILESTONES.find(m => m[0] === km);
-  const at = ms ? ms[1] : fmtKm(km);
-  const li = document.createElement('li');
-  li.innerHTML = '<span class="mname">' + label + '</span><span class="mkm">at ' + at + '</span><span class="prog" hidden></span>';
-  rewardList.appendChild(li);
+function buildRewards(list){
+  for(const [km, label] of REWARDS){
+    const ms = MILESTONES.find(m => m[0] === km);
+    const at = ms ? ms[1] : fmtKm(km);
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="mname">' + label + '</span><span class="mkm">at ' + at + '</span><span class="prog" hidden></span>';
+    list.appendChild(li);
+  }
 }
+buildTargets(railList); buildTargets(railList2);
+buildRewards(rewardList); buildRewards(rewardList2);
 
+/* flight plan drawer */
+const drawer = $('drawer'), drawerBack = $('drawerBack'), drawerBtn = $('drawerBtn');
+function setDrawer(open){
+  drawer.classList.toggle('open', open);
+  drawerBack.classList.toggle('open', open);
+  drawerBtn.setAttribute('aria-expanded', open);
+}
+drawerBtn.addEventListener('click', () => setDrawer(true));
+$('drawerClose').addEventListener('click', () => setDrawer(false));
+drawerBack.addEventListener('click', () => setDrawer(false));
+addEventListener('keydown', e => { if(e.key === 'Escape') setDrawer(false); });
 function updateLadder(list, data){
   let idx = -1;
   for(let i = 0; i < data.length; i++) if(altitude >= data[i][0]) idx = i;
@@ -347,6 +407,8 @@ let passedIdx = -1;
 function updateRail(){
   const idx = updateLadder(railList, MILESTONES);
   const ridx = updateLadder(rewardList, REWARDS);
+  updateLadder(railList2, MILESTONES);
+  updateLadder(rewardList2, REWARDS);
   const nt = MILESTONES[idx + 1], nr = REWARDS[ridx + 1];
   nuTarget.textContent = nt ? nt[1] + ' · ' + Math.min(99, altitude/nt[0]*100).toFixed(0) + '%' : 'BEYOND THE MAP';
   nuReward.textContent = nr ? nr[1] + ' · ' + Math.min(99, altitude/nr[0]*100).toFixed(0) + '%' : 'ALL PAID OUT';
