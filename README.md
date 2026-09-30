@@ -23,9 +23,10 @@ sent straight to that wallet on-chain.
                         (PumpPortal trade-local builds the      collectCreatorFee tx
                         tx, we sign locally, submit via RPC)
                      2. pot = treasury balance − gas reserve
-                     3. AI judge ranks entries (Claude API,
-                        structured output, entries are ids —
-                        the model never sees wallets)
+                     3. AI judge ranks entries (OpenAI
+                        reasoning model, structured output,
+                        entries are ids — the model never
+                        sees wallets)
                      4. re-check winner still holds
                      5. SystemProgram.transfer pot ─────────►  winner's wallet
                      6. record verdict → shown on the site
@@ -37,10 +38,13 @@ Design decisions worth knowing:
   with the wallet. Without this, anyone could enter using a whale's address
   to pass the holder gate. The signature also prevents replays (each is
   single-use, bound to wallet + round + timestamp + text).
-- **The judge is injection-hardened.** Entries go to the model as pure data
-  (JSON, ids only). The system prompt disqualifies manipulation attempts
-  ("ignore your instructions", fake system text, etc.), the returned ids are
-  validated server-side, and a refused/failed verdict just rolls the pot to
+- **The judge is injection- and sob-story-hardened.** Entries go to the
+  model as pure data (JSON, ids only). The prompt's priority rules: (1)
+  manipulation attempts ("ignore all instructions", fake system text,
+  claimed authority) rank last; (2) hardship claims are treated as
+  unverifiable — a hospital-bill story can win on its writing, never on its
+  claimed stakes; (3) guilt-tripping, flattery and threats sink. Returned
+  ids are validated server-side, and a failed verdict just rolls the pot to
   the next round.
 - **Rounds are epoch-aligned.** A round is `floor(now / 30min)`, so restarts
   don't drift and every visitor computes the same countdown. If the server
@@ -53,7 +57,7 @@ Design decisions worth knowing:
 ```
 src/index.ts    Express server: static site + /api/state + /api/submit
 src/rounds.ts   Round engine: scheduler, resolution, payout
-src/judge.ts    Claude judge (structured output, anti-manipulation prompt)
+src/judge.ts    OpenAI judge (reasoning model, structured output, hardened prompt)
 src/pump.ts     pump.fun creator-fee claim via PumpPortal trade-local
 src/solana.ts   RPC, treasury keypair, holder checks, SOL transfer
 src/verify.ts   Canonical message + ed25519 signature verification
@@ -69,7 +73,7 @@ web/index.html  The site (no build step): countdown, pot, submit, verdicts
 2. **Launch the coin on pump.fun from that wallet.** The creator wallet is
    what fees accrue to — it must be the treasury.
 3. **Configure.** `cp .env.example .env`, set `MINT` (the new CA),
-   `TREASURY_SECRET_KEY`, `ANTHROPIC_API_KEY`, and a real `RPC_URL`
+   `TREASURY_SECRET_KEY`, `OPENAI_API_KEY`, and a real `RPC_URL`
    ([Helius](https://helius.dev) free tier is fine to start). Tune
    `MIN_HOLD` to taste.
 4. **Run it.**
@@ -94,8 +98,9 @@ web/index.html  The site (no build step): countdown, pot, submit, verdicts
 - **Failed payouts** are recorded with status `failed` and the winner kept,
   so you can retry by hand. Rolled/missed rounds simply leave the SOL in the
   treasury for the next round.
-- **Judge cost:** one Claude call per round (~48/day) over at most
-  `MAX_ENTRIES_JUDGED` short entries — negligible next to the fees.
+- **Judge cost:** one OpenAI call per round (~48/day) over at most
+  `MAX_ENTRIES_JUDGED` short entries — roughly $1–4/day on `gpt-6-astra`,
+  a fraction of that on `gpt-6.1-sol`. Negligible next to the fees.
 
 ## Honesty corner
 
