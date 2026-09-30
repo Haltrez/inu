@@ -40,12 +40,11 @@ body{
 }
 
 /* top bar */
-.bar{display:flex; align-items:center; gap:12px; font-family:var(--mono); flex:none}
-.bar .sig{letter-spacing:.2em; font-size:11px; color:var(--dim); text-transform:uppercase;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.bar{display:flex; align-items:center; gap:12px; font-family:var(--mono); flex:none;
+  padding-block:2px}
 .chip{border:1px solid var(--line); border-radius:999px; padding:2px 11px; flex:none;
   color:var(--cyan); font-size:12px; letter-spacing:.08em; background:rgba(89,215,255,.06)}
-.bar .x{margin-left:auto; flex:none}
+.bar .x{position:fixed; top:calc(env(safe-area-inset-top, 0px) + 12px); right:14px; z-index:3}
 a.x{display:inline-flex; align-items:center; justify-content:center;
   width:36px; height:36px; border:1px solid var(--line); border-radius:10px;
   color:var(--ink); background:var(--panel); transition:border-color .2s, color .2s, box-shadow .2s}
@@ -160,7 +159,6 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 @media (max-width:720px){
   .stats{grid-template-columns:1fr 1fr}
   .stat.wide{grid-column:1 / -1}
-  .bar .sig{display:none}
 }
 @media (max-height:600px){
   .tag,.micro{display:none}
@@ -179,7 +177,6 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 <div class="shell">
 
   <header class="bar">
-    <span class="sig">Effectively&nbsp;Accelerated&nbsp;Inu</span>
     <span class="chip" id="tickerChip">$EAI</span>
     <a class="x" id="xTop" href="https://x.com/eacceleratedinu" target="_blank" rel="noopener" aria-label="Open our X">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
