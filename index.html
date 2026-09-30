@@ -112,14 +112,10 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .badge{font-size:9px; letter-spacing:.12em; padding:0 6px; border-radius:999px;
   border:1px solid var(--line); color:var(--dim)}
 .badge.live{color:#8dffb0; border-color:#2e6b45; text-shadow:0 0 8px rgba(141,255,176,.6)}
+.badge.sync{color:#ffd58a; border-color:#6b542e}
 
-.lower{display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; align-items:center}
-.throttle{display:flex; flex-direction:column; gap:2px; min-width:0}
-.throttle label{font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase}
-.throttle input{width:100%; accent-color:var(--cyan); height:22px; margin:0}
-.throttle .ends{display:flex; justify-content:space-between; font-family:var(--mono);
-  font-size:10px; color:var(--dim)}
-.carow{display:flex; align-items:stretch; gap:8px; min-width:0}
+.carow{display:flex; align-items:stretch; gap:8px; min-width:0;
+  width:100%; max-width:640px; margin-inline:auto}
 .cabox{display:flex; flex:1; min-width:0; border:1px solid var(--line); border-radius:10px;
   overflow:hidden; background:rgba(4,6,19,.45)}
 .cabox .calbl{display:flex; align-items:center; padding:0 10px; font-family:var(--mono);
@@ -138,7 +134,6 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 @media (max-width:720px){
   .stats{grid-template-columns:1fr 1fr}
   .stat.wide{grid-column:1 / -1}
-  .lower{grid-template-columns:1fr}
   .bar .sig{display:none}
 }
 @media (max-height:600px){
@@ -169,7 +164,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
     <h1>Effectively <span class="grad">Accelerated</span> Inu</h1>
     <p class="tag">Velocity is a pure function of market cap — <b>the higher the MC, the faster he flies</b>. He does not slow down. He is not able to.</p>
     <div class="mccount">
-      <span class="mclbl">Market cap <span class="badge" id="feedBadge">SIM</span></span>
+      <span class="mclbl">Market cap <span class="badge" id="feedBadge">STANDBY</span></span>
       <span class="mcnum" id="mcVal">$0</span>
     </div>
     <div class="inu-wrap" id="inuWrap">
@@ -184,18 +179,11 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
       <div class="stat"><span class="lbl">Altitude</span><span class="val" id="altVal">0 km</span></div>
       <div class="stat wide"><span class="lbl">Status</span><span class="val tier" id="tierVal">WARMING UP</span></div>
     </div>
-    <div class="lower">
-      <div class="throttle" id="throttleRow">
-        <label for="throttle">Simulate market cap — pre-launch demo</label>
-        <input type="range" id="throttle" min="0" max="1000" value="170" step="1">
-        <div class="ends"><span>$1K</span><span>$1M</span></div>
-      </div>
-      <div class="carow">
-        <div class="cabox">
-          <span class="calbl">CA</span>
-          <code id="caText">TBA — LAUNCHING SOON</code>
-          <button id="copyBtn" type="button" disabled>SOON</button>
-        </div>
+    <div class="carow">
+      <div class="cabox">
+        <span class="calbl">CA</span>
+        <code id="caText">COMING SOON</code>
+        <button id="copyBtn" type="button" disabled>SOON</button>
       </div>
     </div>
     <p class="micro">Only trust the CA posted here and on our X. $EAI is a memecoin with no intrinsic value — he just goes up.</p>
@@ -232,12 +220,12 @@ $('tickerChip').textContent = CONFIG.TICKER;
 $('xTop').href = CONFIG.X_URL;
 
 /* ---- market cap state ---- */
-let targetMc = 0, mc = 0, live = false, altitude = 0;
+const IDLE_MC = 2800;                     // calm pre-launch cruise until the live feed arrives
+let targetMc = IDLE_MC, mc = 0, live = false, altitude = 0;
 
-function sliderToMc(v){ return v <= 0 ? 0 : Math.pow(10, 3 + (v/1000)*3); } // $1K → $1M, log scale
-const throttle = $('throttle');
-targetMc = sliderToMc(+throttle.value);
-throttle.addEventListener('input', () => { if(!live) targetMc = sliderToMc(+throttle.value); });
+const feedBadge = $('feedBadge');
+if(CONFIG.CA){ feedBadge.textContent = 'SYNCING'; feedBadge.classList.add('sync'); }
+else feedBadge.textContent = 'STANDBY';
 
 function speedFor(m){
   // log curve spending most of the visual range between $2K and $250K, slow gains after
@@ -289,13 +277,13 @@ async function pollLive(){
       targetMc = m;
       if(!live){
         live = true;
-        $('feedBadge').textContent = 'LIVE';
-        $('feedBadge').classList.add('live');
-        $('throttleRow').hidden = true;
+        feedBadge.textContent = 'LIVE';
+        feedBadge.classList.remove('sync');
+        feedBadge.classList.add('live');
       }
     }
-  }catch(e){ /* no feed yet — stay in demo mode */ }
-  setTimeout(pollLive, 30000);
+  }catch(e){ /* not indexed yet — keep idling */ }
+  setTimeout(pollLive, live ? 30000 : 12000);   // poll faster until the pair is indexed
 }
 pollLive();
 
@@ -453,7 +441,7 @@ function frame(ts){
   /* HUD ~5×/sec */
   if(ts - hudAt > 200){
     hudAt = ts;
-    mcVal.textContent = fmtUsd(mc);
+    mcVal.textContent = live ? fmtUsd(mc) : (CONFIG.CA ? 'SYNCING…' : 'COMING SOON');
     velVal.textContent = s.toFixed(1) + '×';
     altVal.textContent = Math.round(altitude).toLocaleString('en-US') + ' km';
     inuImg.style.setProperty('--glow', Math.round(16 + vis*2.4) + 'px');
