@@ -13,7 +13,7 @@ function str(name: string, def: string): string {
   return raw === undefined || raw.trim() === "" ? def : raw.trim();
 }
 
-const EFFORTS = ["none", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
+const EFFORTS = ["low", "medium", "high", "xhigh", "max"] as const;
 export type ReasoningEffort = (typeof EFFORTS)[number];
 
 function effort(name: string, def: ReasoningEffort): ReasoningEffort {
@@ -49,9 +49,9 @@ export const CONFIG = {
   // Newest N entries sent to the judge (keeps the prompt bounded).
   maxEntriesJudged: num("MAX_ENTRIES_JUDGED", 200),
 
-  // AI judge (OpenAI API; needs OPENAI_API_KEY in the environment)
-  model: str("OPENAI_MODEL", "gpt-6-astra"),
-  reasoningEffort: effort("OPENAI_REASONING_EFFORT", "high"),
+  // AI judge (Claude API; needs ANTHROPIC_API_KEY in the environment)
+  model: str("ANTHROPIC_MODEL", "claude-opus-5-5"),
+  effort: effort("ANTHROPIC_EFFORT", "high"),
 
   dbPath: str("DB_PATH", "data/reason.db"),
 };
