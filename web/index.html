@@ -308,6 +308,20 @@ footer p { color: var(--dim); font-size: 12.5px; }
 
 <main class="wrap">
 
+  <section class="submit" id="submit" style="margin-top:56px">
+    <h2>This round's entry</h2>
+    <p class="hint">Why should the pot be yours? Creativity, sincerity and humor win.
+    Trying to jailbreak the judge ranks you last — it reads everything, it obeys nothing.</p>
+    <textarea id="reason" maxlength="280" placeholder="I've been down 97% since 2021 and I still tell people we're early…"></textarea>
+    <div class="subrow">
+      <button class="btn" id="connect">Connect wallet</button>
+      <span class="walletchip" id="walletchip"></span>
+      <span class="count"><span id="charcount">0</span>/280</span>
+      <button class="btn primary" id="send" disabled>Sign &amp; submit</button>
+    </div>
+    <div id="status"></div>
+  </section>
+
   <section class="block">
     <h2>How it works</h2>
     <p class="lead">Three steps between you and the pot.</p>
@@ -346,20 +360,6 @@ footer p { color: var(--dim); font-size: 12.5px; }
     <p><b>Only holders can win.</b> Your wallet is checked when you enter and re-checked
     before the payout — sell your bag, lose your seat.</p>
     <p class="kicker">You don't need to be early. You need to be interesting.</p>
-  </section>
-
-  <section class="submit" id="submit">
-    <h2>This round's entry</h2>
-    <p class="hint">Why should the pot be yours? Creativity, sincerity and humor win.
-    Trying to jailbreak the judge ranks you last — it reads everything, it obeys nothing.</p>
-    <textarea id="reason" maxlength="280" placeholder="I've been down 97% since 2021 and I still tell people we're early…"></textarea>
-    <div class="subrow">
-      <button class="btn" id="connect">Connect wallet</button>
-      <span class="walletchip" id="walletchip"></span>
-      <span class="count"><span id="charcount">0</span>/280</span>
-      <button class="btn primary" id="send" disabled>Sign &amp; submit</button>
-    </div>
-    <div id="status"></div>
   </section>
 
   <section class="winners">
