@@ -5,188 +5,278 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>REASONS</title>
 <meta name="description" content="$REASONS — 100% of creator fees. Every 30 minutes an AI reads every holder's reason and pays the best one." />
+<meta name="theme-color" content="#ffffff" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 :root {
   --bg: #ffffff;
-  --bg2: #f4f7f5;
-  --panel: #ffffff;
-  --line: #e2e8e4;
-  --text: #0a120d;
-  --dim: #5f6d65;
-  --accent: #00a656;   /* pump green, readable on white */
-  --neon: #53f28f;     /* pump.fun neon, fills + glows */
+  --bg2: #f5f8f6;
+  --ink: #0a120d;
+  --dim: #5c6a61;
+  --line: #e7ece8;
+  --accent: #00a656;
+  --neon: #53f28f;
+  --dark: #08140d;
+  --dark-text: #e9f6ee;
   --danger: #d92d20;
-  --radius: 14px;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --shadow-sm: 0 1px 2px rgba(10,18,13,.05), 0 1px 1px rgba(10,18,13,.03);
+  --shadow-md: 0 16px 40px -16px rgba(10,18,13,.22);
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: var(--bg); color: var(--text); }
+html { scroll-behavior: smooth; }
 body {
-  font-family: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  min-height: 100vh;
-  line-height: 1.5;
+  font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--ink);
+  line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--neon); color: var(--dark); }
+a { color: inherit; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+/* ================= header ================= */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .02em; font-size: 17px; }
+.brand .mark {
+  width: 26px; height: 26px; border-radius: 8px; background: var(--neon);
+  display: grid; place-items: center; color: var(--dark); font-weight: 700; font-size: 15px;
+  box-shadow: 0 0 18px rgba(83,242,143,.55);
+}
+.nav .actions { display: flex; align-items: center; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font: inherit; font-weight: 600; font-size: 14px; text-decoration: none;
+  border-radius: 999px; padding: 10px 20px; border: 1px solid var(--line);
+  background: #fff; color: var(--ink);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, filter .15s ease;
+}
+.btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.btn.primary {
+  background: var(--neon); color: var(--dark); border-color: transparent;
+  box-shadow: 0 0 0 1px rgba(10,18,13,.04), 0 8px 24px -8px rgba(83,242,143,.9);
+}
+.btn.primary:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ================= hero ================= */
+.hero { position: relative; text-align: center; padding: 84px 0 40px; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: -40% -20% auto; height: 720px; z-index: -1;
   background:
-    radial-gradient(1100px 540px at 75% -12%, rgba(83,242,143,.22), transparent 60%),
-    radial-gradient(800px 460px at 5% 15%, rgba(83,242,143,.10), transparent 60%),
-    var(--bg);
+    radial-gradient(640px 320px at 50% 18%, rgba(83,242,143,.28), transparent 65%),
+    radial-gradient(900px 460px at 85% 0%, rgba(83,242,143,.12), transparent 60%);
 }
-.wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 80px; }
-
-/* ---- top bar ---- */
-.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
-.wordmark { font-weight: 800; letter-spacing: .35em; font-size: 15px; }
-.wordmark em { color: var(--accent); font-style: normal; }
-.xbtn {
-  color: var(--dim); text-decoration: none; border: 1px solid var(--line);
-  border-radius: 10px; padding: 6px 12px; font-size: 13px;
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); background: rgba(255,255,255,.8);
+  border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 500; color: var(--dim);
 }
-.xbtn:hover { color: var(--text); border-color: var(--accent); }
-
-/* ---- hero ---- */
-.hero { text-align: center; padding: 46px 0 28px; }
-.hero h1 { font-size: clamp(28px, 6vw, 52px); letter-spacing: -.01em; line-height: 1.12; }
-.hero h1 .ai { color: var(--accent); }
-.hero p.sub { color: var(--dim); margin: 14px auto 0; max-width: 640px; font-size: 15px; }
-
-.statgrid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-  margin: 34px 0 10px;
+.badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,166,86,.35); } 50% { box-shadow: 0 0 0 6px rgba(0,166,86,0); } }
+.hero h1 {
+  margin: 22px auto 0; max-width: 820px;
+  font-size: clamp(40px, 7.4vw, 76px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1.04;
 }
-@media (max-width: 900px) { .statgrid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .statgrid { grid-template-columns: 1fr; } }
+.hero h1 .ai {
+  background: linear-gradient(92deg, var(--accent), #2fd87f 55%, var(--neon));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero .sub { margin: 18px auto 0; max-width: 560px; color: var(--dim); font-size: 17px; }
+
+/* countdown centerpiece */
+.clock { margin-top: 44px; }
+.clock .label { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+#countdown {
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  font-size: clamp(64px, 13vw, 128px); font-weight: 700; letter-spacing: -.02em;
+  line-height: 1.05; color: var(--ink);
+}
+#countdown.hot { color: var(--accent); }
+
+/* stat row */
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  max-width: 760px; margin: 40px auto 0;
+}
+@media (max-width: 640px) { .stats { grid-template-columns: 1fr; max-width: 380px; } }
 .stat {
-  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 18px 14px;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 18px 16px 16px; box-shadow: var(--shadow-sm);
 }
-.stat .label { color: var(--dim); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
-.stat .value { font-size: clamp(26px, 5vw, 40px); font-weight: 800; margin-top: 6px; font-variant-numeric: tabular-nums; }
-.stat .value.small { font-size: clamp(20px, 4vw, 30px); }
-#countdown { color: var(--accent); }
-#pot { color: var(--accent); }
+.stat .k { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+.stat .v {
+  margin-top: 6px; font-family: var(--mono); font-variant-numeric: tabular-nums;
+  font-size: clamp(22px, 3.4vw, 30px); font-weight: 700;
+}
+.stat .v.green { color: var(--accent); }
 
-/* ---- CA pill ---- */
+/* CA bar */
 .ca {
-  display: flex; align-items: center; gap: 10px; justify-content: center;
-  margin: 22px auto 0; max-width: 640px;
-  background: var(--bg2); border: 1px dashed var(--line); border-radius: 12px;
-  padding: 10px 14px; font-size: 13px; color: var(--dim);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  max-width: 640px; margin: 26px auto 0;
+  background: var(--bg2); border: 1px dashed #cfdad2; border-radius: 14px;
+  padding: 12px 16px; font-family: var(--mono); font-size: 13px; color: var(--dim);
   overflow-wrap: anywhere;
 }
 .ca button {
-  flex-shrink: 0; background: transparent; color: var(--accent); border: 1px solid var(--accent);
-  border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer;
+  flex-shrink: 0; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+  color: var(--accent); background: #fff; border: 1px solid var(--accent);
+  border-radius: 999px; padding: 6px 14px; transition: background .15s;
 }
-.ca button:hover { background: rgba(0,166,86,.08); }
+.ca button:hover { background: rgba(0,166,86,.07); }
 
-/* ---- how it works ---- */
-.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 48px 0 0; }
-@media (max-width: 640px) { .how { grid-template-columns: 1fr; } }
-.how .step {
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
-  background: linear-gradient(180deg, rgba(83,242,143,.07), transparent);
+/* ================= ticker ================= */
+.ticker {
+  margin-top: 64px; border-block: 1px solid var(--line); background: #fff;
+  overflow: hidden; white-space: nowrap; user-select: none;
 }
-.how .n { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .2em; }
-.how h3 { font-size: 15px; margin: 8px 0 6px; }
-.how p { color: var(--dim); font-size: 13px; }
+.ticker-track { display: inline-block; padding: 12px 0; animation: marquee 32s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker span {
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--dim); margin: 0 26px;
+}
+.ticker b { color: var(--accent); font-weight: 700; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* ---- why ---- */
+/* ================= sections ================= */
+section.block { padding: 72px 0 0; }
+.block h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 700; letter-spacing: -.02em; }
+.block .lead { color: var(--dim); margin-top: 6px; font-size: 15px; }
+
+/* how it works */
+.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+@media (max-width: 720px) { .how { grid-template-columns: 1fr; } }
+.step {
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 24px; box-shadow: var(--shadow-sm);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.step .n {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: rgba(83,242,143,.18); color: var(--accent);
+  font-family: var(--mono); font-weight: 700; font-size: 14px;
+}
+.step h3 { margin-top: 14px; font-size: 17px; font-weight: 600; }
+.step p { margin-top: 6px; color: var(--dim); font-size: 14px; }
+
+/* manifesto — inverted band */
 .why {
-  margin: 48px 0 0; border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 26px 24px; background: linear-gradient(180deg, rgba(83,242,143,.10), transparent);
+  margin-top: 72px; background: var(--dark); color: var(--dark-text);
+  border-radius: calc(var(--r-lg) + 6px); padding: clamp(32px, 5vw, 56px);
+  position: relative; overflow: hidden;
 }
-.why h2 { font-size: 18px; margin-bottom: 12px; }
-.why p { color: var(--text); font-size: 14px; max-width: 700px; }
-.why p + p { margin-top: 12px; }
-.why p.dim { color: var(--dim); }
-.why b { color: var(--accent); }
+.why::after {
+  content: ""; position: absolute; right: -120px; top: -120px; width: 380px; height: 380px;
+  background: radial-gradient(closest-side, rgba(83,242,143,.22), transparent);
+  pointer-events: none;
+}
+.why .tag { font-family: var(--mono); font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--neon); font-weight: 700; }
+.why h2 { margin-top: 12px; color: #fff; }
+.why p { margin-top: 16px; max-width: 700px; font-size: 15.5px; color: #c4d6ca; }
+.why b { color: var(--neon); font-weight: 600; }
+.why .kicker { margin-top: 22px; font-family: var(--mono); font-size: 14px; color: #fff; }
 
-/* ---- submit ---- */
+/* submit */
 .submit {
-  margin: 48px 0 0; background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 22px;
+  margin-top: 72px; background: #fff; border: 1px solid var(--line);
+  border-radius: var(--r-lg); padding: clamp(24px, 4vw, 36px); box-shadow: var(--shadow-sm);
 }
-.submit h2 { font-size: 18px; }
-.submit .hint { color: var(--dim); font-size: 13px; margin-top: 4px; }
+.submit .hint { color: var(--dim); font-size: 14px; margin-top: 6px; max-width: 640px; }
 .submit textarea {
-  width: 100%; margin-top: 14px; min-height: 96px; resize: vertical;
-  background: var(--bg2); color: var(--text); border: 1px solid var(--line);
-  border-radius: 10px; padding: 12px; font: inherit; font-size: 14px;
+  width: 100%; margin-top: 18px; min-height: 104px; resize: vertical;
+  background: var(--bg2); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 14px 16px; font: inherit; font-size: 15px;
+  transition: border-color .15s, box-shadow .15s;
 }
-.submit textarea:focus { outline: none; border-color: var(--accent); }
-.subrow { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-.count { color: var(--dim); font-size: 12px; margin-left: auto; }
-button.primary {
-  background: var(--neon); color: #052712; font: inherit; font-weight: 800;
-  border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer; font-size: 14px;
-  box-shadow: 0 0 22px rgba(83,242,143,.55);
-}
-button.primary:hover { filter: brightness(1.05); }
-button.primary:disabled { opacity: .45; cursor: not-allowed; }
-button.ghost {
-  background: transparent; color: var(--text); font: inherit;
-  border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; cursor: pointer; font-size: 14px;
-}
-button.ghost:hover { border-color: var(--accent); }
-.walletchip { color: var(--dim); font-size: 13px; }
-.walletchip b { color: var(--text); }
-#status { margin-top: 12px; font-size: 13px; min-height: 20px; }
-#status.ok { color: var(--accent); }
+.submit textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,166,86,.12); background: #fff; }
+.subrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.count { color: var(--dim); font-size: 12.5px; font-family: var(--mono); margin-left: auto; }
+.walletchip { color: var(--dim); font-size: 13px; font-family: var(--mono); }
+.walletchip b { color: var(--ink); font-weight: 600; }
+#status { margin-top: 14px; font-size: 14px; min-height: 20px; }
+#status.ok { color: var(--accent); font-weight: 500; }
 #status.err { color: var(--danger); }
 
-/* ---- winners ---- */
-.winners { margin-top: 56px; }
-.winners h2 { font-size: 18px; margin-bottom: 4px; }
-.winners .sub { color: var(--dim); font-size: 13px; margin-bottom: 16px; }
+/* winners */
+.winners { margin-top: 72px; }
+#winlist { margin-top: 24px; display: grid; gap: 14px; }
 .win {
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
-  margin-bottom: 12px; background: var(--bg2);
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 22px 24px; box-shadow: var(--shadow-sm);
+  transition: transform .18s ease, box-shadow .18s ease;
 }
-.win .head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
-.win .amount { color: var(--accent); font-weight: 800; }
-.win .reason { margin-top: 10px; font-size: 14px; }
-.win .verdict { margin-top: 8px; font-size: 13px; color: var(--accent); }
+.win:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.win .head {
+  display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 12.5px; color: var(--dim);
+}
+.win .amount { color: var(--accent); font-weight: 700; }
+.win .amount a { color: var(--dim); font-weight: 400; }
+.win .reason { margin-top: 12px; font-size: 16px; font-weight: 500; line-height: 1.5; }
+.win .verdict { margin-top: 10px; font-size: 14px; color: var(--accent); }
 .win .verdict::before { content: "AI verdict — "; color: var(--dim); }
-.win .runner { margin-top: 8px; font-size: 13px; color: var(--dim); }
-.win .runner .medal { color: var(--accent); font-weight: 800; margin-right: 6px; }
-.win a { color: var(--dim); }
-.empty { color: var(--dim); font-size: 13px; border: 1px dashed var(--line); border-radius: var(--radius); padding: 18px; text-align: center; }
+.win .runner { margin-top: 10px; font-size: 13.5px; color: var(--dim); }
+.win .runner .medal {
+  display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: var(--accent); background: rgba(83,242,143,.16);
+  border-radius: 999px; padding: 2px 9px; margin-right: 8px;
+}
+.empty {
+  color: var(--dim); font-size: 14px; text-align: center;
+  border: 1px dashed #cfdad2; border-radius: var(--r-lg); padding: 28px;
+  background: var(--bg2);
+}
 
-/* ---- footer ---- */
-footer { margin-top: 64px; color: var(--dim); font-size: 12px; text-align: center; }
-footer p + p { margin-top: 6px; }
+/* footer */
+footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 28px 0 44px; }
+footer .wrap { display: flex; flex-direction: column; gap: 6px; }
+footer p { color: var(--dim); font-size: 12.5px; }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="top">
-    <div class="wordmark">RE<em>A</em>SONS</div>
-    <a class="xbtn" id="xlink" href="#" target="_blank" rel="noopener">𝕏</a>
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="mark">R</span> REASONS</div>
+    <div class="actions">
+      <a class="btn" id="xlink" href="#" target="_blank" rel="noopener">𝕏</a>
+      <a class="btn primary" id="buybtn" href="#" target="_blank" rel="noopener" hidden>Buy $REASONS</a>
+    </div>
   </div>
+</header>
+
+<main class="wrap">
 
   <section class="hero">
+    <span class="badge"><span class="dot"></span> AI-judged fee redistribution · every 30 minutes</span>
     <h1>Give the <span class="ai">AI</span> one good reason.</h1>
     <p class="sub">100% of $REASONS creator fees go back to holders. Every 30 minutes,
     an AI reads every holder's reason and sends the pot to the best one. Holders only —
     no team cut, no raffle. Just reasons.</p>
 
-    <div class="statgrid">
-      <div class="stat">
-        <div class="label">next verdict in</div>
-        <div class="value" id="countdown">--:--</div>
-      </div>
-      <div class="stat">
-        <div class="label">current pot</div>
-        <div class="value" id="pot">— SOL</div>
-      </div>
-      <div class="stat">
-        <div class="label">reasons this round</div>
-        <div class="value small" id="entries">—</div>
-      </div>
-      <div class="stat">
-        <div class="label">total given away</div>
-        <div class="value small" id="totalpaid">0 SOL</div>
-      </div>
+    <div class="clock">
+      <div class="label">next verdict in</div>
+      <div id="countdown">--:--</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">current pot</div><div class="v green" id="pot">— SOL</div></div>
+      <div class="stat"><div class="k">reasons this round</div><div class="v" id="entries">—</div></div>
+      <div class="stat"><div class="k">total given away</div><div class="v" id="totalpaid">0 SOL</div></div>
     </div>
 
     <div class="ca">
@@ -194,42 +284,58 @@ footer p + p { margin-top: 6px; }
       <button id="ca-copy" hidden>COPY</button>
     </div>
   </section>
+</main>
 
-  <section class="how">
-    <div class="step">
-      <div class="n">01</div>
-      <h3>Hold $REASONS</h3>
-      <p>Buy on pump.fun. Holding is your ticket — the gate is checked on-chain
-      when you enter and again before the payout.</p>
-    </div>
-    <div class="step">
-      <div class="n">02</div>
-      <h3>State your reason</h3>
-      <p>One reason per wallet per round, 280 characters. Sign it with your wallet
-      so nobody can enter as you. Resubmitting replaces your entry.</p>
-    </div>
-    <div class="step">
-      <div class="n">03</div>
-      <h3>The AI decides</h3>
-      <p>When the countdown hits zero, the AI ranks every reason and the pot is
-      sent straight to the winner's wallet. On-chain, every time.</p>
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="tickertrack">
+    <span><b>100%</b> of creator fees → holders</span>
+    <span>AI verdict every <b>30:00</b></span>
+    <span>holders only — checked on-chain, twice</span>
+    <span>jailbreaking the judge ranks you <b>last</b></span>
+    <span>every payout on-chain, verifiable</span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="block">
+    <h2>How it works</h2>
+    <p class="lead">Three steps between you and the pot.</p>
+    <div class="how">
+      <div class="step">
+        <div class="n">01</div>
+        <h3>Hold $REASONS</h3>
+        <p>Buy on pump.fun. Holding is your ticket — your balance is verified on-chain
+        when you enter, and again before the payout.</p>
+      </div>
+      <div class="step">
+        <div class="n">02</div>
+        <h3>State your reason</h3>
+        <p>One reason per wallet per round, 280 characters, signed with your wallet so
+        nobody can enter as you. Resubmitting replaces your entry.</p>
+      </div>
+      <div class="step">
+        <div class="n">03</div>
+        <h3>The AI decides</h3>
+        <p>At zero, the AI ranks every reason and the pot is sent straight to the
+        winner's wallet. On-chain, every time, verdict published below.</p>
+      </div>
     </div>
   </section>
 
   <section class="why" id="why">
-    <h2>Why this coin exists</h2>
-    <p>The market is drowning in AI slop. Another agent framework, another
-    fake-utility chatbot coin, another roadmap written by the same model that
-    wrote the last hundred. Nobody believes the AI does anything, because it
-    doesn't.</p>
+    <div class="tag">Why this coin exists</div>
+    <h2>The market is drowning in AI slop.</h2>
+    <p>Another agent framework, another fake-utility chatbot coin, another roadmap
+    written by the same model that wrote the last hundred. Nobody believes the AI
+    does anything — because it doesn't.</p>
     <p>$REASONS doesn't pretend the AI is a product. Here, <b>the AI spends the
-    money</b>. 100% of creator fees flow back to holders — not to the fastest
-    sniper, not to a raffle bot — to the holder who gives the best reason.
-    Every 30 minutes the judge reads every entry and pays one of them.
-    On-chain, in public, verdict posted.</p>
-    <p><b>Only holders can win.</b> Your wallet is checked when you enter and
-    re-checked before the payout — sell your bag, lose your seat.</p>
-    <p class="dim">You don't need to be early. You need to be interesting.</p>
+    money</b>. 100% of creator fees flow back to holders — not to the fastest sniper,
+    not to a raffle bot — to the holder who gives the best reason. Every 30 minutes
+    the judge reads every entry and pays one of them. On-chain, in public, verdict posted.</p>
+    <p><b>Only holders can win.</b> Your wallet is checked when you enter and re-checked
+    before the payout — sell your bag, lose your seat.</p>
+    <p class="kicker">You don't need to be early. You need to be interesting.</p>
   </section>
 
   <section class="submit" id="submit">
@@ -238,25 +344,28 @@ footer p + p { margin-top: 6px; }
     Trying to jailbreak the judge ranks you last — it reads everything, it obeys nothing.</p>
     <textarea id="reason" maxlength="280" placeholder="I've been down 97% since 2021 and I still tell people we're early…"></textarea>
     <div class="subrow">
-      <button class="ghost" id="connect">Connect wallet</button>
+      <button class="btn" id="connect">Connect wallet</button>
       <span class="walletchip" id="walletchip"></span>
       <span class="count"><span id="charcount">0</span>/280</span>
-      <button class="primary" id="send" disabled>Sign &amp; submit</button>
+      <button class="btn primary" id="send" disabled>Sign &amp; submit</button>
     </div>
     <div id="status"></div>
   </section>
 
   <section class="winners">
     <h2>Past verdicts</h2>
-    <p class="sub">Every payout is on-chain. Click through and check.</p>
+    <p class="lead">Every payout is on-chain. Click through and check.</p>
     <div id="winlist"><div class="empty">No verdicts yet. Be the first reason.</div></div>
   </section>
 
-  <footer>
+</main>
+
+<footer>
+  <div class="wrap">
     <p>$REASONS is a memecoin experiment. The AI's verdict is final and sometimes unhinged.</p>
     <p>Nothing here is financial advice. The pot is whatever the creator fees are — could be a lot, could be dust.</p>
-  </footer>
-</div>
+  </div>
+</footer>
 
 <script>
 /* ============================ CONFIG ================================ */
@@ -273,6 +382,9 @@ let provider = null;       // injected wallet provider
 let pubkey = null;         // connected wallet (base58 string)
 
 if (SITE.X_URL) $("xlink").href = SITE.X_URL; else $("xlink").hidden = true;
+
+// double the ticker content so the marquee loops seamlessly
+$("tickertrack").innerHTML += $("tickertrack").innerHTML;
 
 /* ---- state polling ---- */
 async function refreshState() {
@@ -295,9 +407,12 @@ function renderState() {
   if (state.mint) {
     $("ca-text").textContent = "CA: " + state.mint;
     $("ca-copy").hidden = false;
+    $("buybtn").href = "https://pump.fun/coin/" + encodeURIComponent(state.mint);
+    $("buybtn").hidden = false;
   } else {
     $("ca-text").textContent = "CA: COMING SOON";
     $("ca-copy").hidden = true;
+    $("buybtn").hidden = true;
   }
 }
 
@@ -313,9 +428,11 @@ $("ca-copy").addEventListener("click", async () => {
 /* ---- countdown ---- */
 function tickCountdown() {
   if (!state) return;
+  const el = $("countdown");
   let ms = state.roundEndsAt - (Date.now() + clockSkew);
   if (ms <= 0) {
-    $("countdown").textContent = "JUDGING…";
+    el.textContent = "JUDGING…";
+    el.classList.add("hot");
     // round flipped — grab the new round shortly after
     if (ms > -15000) setTimeout(refreshState, 4000);
     return;
@@ -326,7 +443,8 @@ function tickCountdown() {
   const s = total % 60;
   const mm = String(m).padStart(2, "0");
   const ss = String(s).padStart(2, "0");
-  $("countdown").textContent = h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+  el.textContent = h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+  el.classList.toggle("hot", total <= 120);
 }
 setInterval(tickCountdown, 250);
 
