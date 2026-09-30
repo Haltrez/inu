@@ -65,6 +65,12 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   -webkit-background-clip:text; background-clip:text; color:transparent}
 .tag{margin:2px 0 0; color:var(--dim); font-size:clamp(12px,1.5vw,15px); max-width:44em; flex:none}
 .tag b{color:var(--cyan); font-weight:600}
+.mccount{display:flex; flex-direction:column; align-items:center; gap:1px; flex:none; margin-top:4px}
+.mclbl{font-family:var(--mono); font-size:10px; letter-spacing:.24em; color:var(--dim);
+  text-transform:uppercase; display:flex; align-items:center; gap:8px}
+.mcnum{font-family:var(--mono); font-size:clamp(26px,4.4vw,44px); line-height:1.12;
+  color:var(--hot); font-variant-numeric:tabular-nums;
+  text-shadow:0 0 24px rgba(89,215,255,.6), 0 0 70px rgba(138,92,255,.35)}
 .inu-wrap{flex:1; min-height:0; width:100%; display:flex; align-items:center;
   justify-content:center; position:relative; will-change:transform}
 .inu-wrap img{
@@ -95,7 +101,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   display:flex; flex-direction:column; gap:10px;
   box-shadow:0 0 40px rgba(20,40,110,.35), inset 0 0 30px rgba(89,215,255,.04);
 }
-.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
 .stat{border:1px solid var(--line); border-radius:9px; padding:7px 11px;
   display:flex; flex-direction:column; gap:1px; min-width:0; background:rgba(4,6,19,.45)}
 .stat .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--dim);
@@ -130,13 +136,15 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .micro{margin:0; font-size:10.5px; color:var(--dim); text-align:center; flex:none}
 
 @media (max-width:720px){
-  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat.wide{grid-column:1 / -1}
   .lower{grid-template-columns:1fr}
   .bar .sig{display:none}
 }
 @media (max-height:600px){
   .tag,.micro{display:none}
   .console{gap:7px}
+  .mcnum{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){
   .pulse.go{animation:none}
@@ -160,6 +168,10 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   <main class="scene" aria-label="Effectively Accelerated Inu">
     <h1>Effectively <span class="grad">Accelerated</span> Inu</h1>
     <p class="tag">Velocity is a pure function of market cap — <b>the higher the MC, the faster he flies</b>. He does not slow down. He is not able to.</p>
+    <div class="mccount">
+      <span class="mclbl">Market cap <span class="badge" id="feedBadge">SIM</span></span>
+      <span class="mcnum" id="mcVal">$0</span>
+    </div>
     <div class="inu-wrap" id="inuWrap">
       <img src="images/inu.webp" alt="A shiba inu made of blue plasma, accelerating upward through deep space" width="996" height="1000">
       <div class="pulse" id="pulse"></div>
@@ -168,16 +180,15 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 
   <section class="console" aria-label="Flight telemetry">
     <div class="stats">
-      <div class="stat"><span class="lbl">Market cap <span class="badge" id="feedBadge">SIM</span></span><span class="val" id="mcVal">$0</span></div>
       <div class="stat"><span class="lbl">Velocity</span><span class="val" id="velVal">1.0&times;</span></div>
-      <div class="stat"><span class="lbl">Status</span><span class="val tier" id="tierVal">WARMING UP</span></div>
       <div class="stat"><span class="lbl">Altitude</span><span class="val" id="altVal">0 km</span></div>
+      <div class="stat wide"><span class="lbl">Status</span><span class="val tier" id="tierVal">WARMING UP</span></div>
     </div>
     <div class="lower">
       <div class="throttle" id="throttleRow">
         <label for="throttle">Simulate market cap — pre-launch demo</label>
-        <input type="range" id="throttle" min="0" max="1000" value="300" step="1">
-        <div class="ends"><span>$1K</span><span>$1B</span></div>
+        <input type="range" id="throttle" min="0" max="1000" value="170" step="1">
+        <div class="ends"><span>$1K</span><span>$1M</span></div>
       </div>
       <div class="carow">
         <div class="cabox">
@@ -203,15 +214,15 @@ const CONFIG = {
 
 const TIERS = [
   [0,        "WARMING UP"],
-  [1e4,      "IGNITION"],
-  [5e4,      "FULL THRUST"],
-  [1e5,      "SUPERSONIC"],
-  [2.5e5,    "ESCAPE VELOCITY"],
-  [1e6,      "ORBITAL"],
-  [5e6,      "INTERSTELLAR"],
-  [1e7,      "LIGHTSPEED"],
-  [1e8,      "LUDICROUS SPEED"],
-  [1e9,      "SINGULARITY"],
+  [5e3,      "IGNITION"],
+  [1.5e4,    "FULL THRUST"],
+  [3e4,      "SUPERSONIC"],
+  [6e4,      "ESCAPE VELOCITY"],
+  [1e5,      "ORBITAL"],
+  [1.5e5,    "INTERSTELLAR"],
+  [2.5e5,    "LIGHTSPEED"],
+  [5e5,      "LUDICROUS SPEED"],
+  [1e6,      "SINGULARITY"],
 ];
 
 const $ = id => document.getElementById(id);
@@ -223,21 +234,23 @@ $('xTop').href = CONFIG.X_URL;
 /* ---- market cap state ---- */
 let targetMc = 0, mc = 0, live = false, altitude = 0;
 
-function sliderToMc(v){ return v <= 0 ? 0 : Math.pow(10, 3 + (v/1000)*6); } // $1K → $1B, log scale
+function sliderToMc(v){ return v <= 0 ? 0 : Math.pow(10, 3 + (v/1000)*3); } // $1K → $1M, log scale
 const throttle = $('throttle');
 targetMc = sliderToMc(+throttle.value);
 throttle.addEventListener('input', () => { if(!live) targetMc = sliderToMc(+throttle.value); });
 
 function speedFor(m){
-  if(m < 1000) return 0.6 + (m/1000)*0.4;
-  const t = Math.min(1, (Math.log10(m) - 3) / 6);   // $1K → $1B mapped 0..1
-  return 1 + (t*t) * 39;                            // eases in, ~40× at $1B
+  // log curve spending most of the visual range between $2K and $250K, slow gains after
+  const LO = Math.log10(2e3), HI = Math.log10(2.5e5);
+  if(m < 2e3) return 0.5 + (m/2e3)*1.4;             // launch crawl → ~1.9× at $3K
+  const t = (Math.log10(m) - LO) / (HI - LO);
+  if(t <= 1) return 1.9 + Math.pow(t, 1.4) * 28.1;  // ~30× at $250K
+  return Math.min(40, 30 + (Math.log10(m) - HI) * 2.8);
 }
 function fmtUsd(v){
   if(v >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
   if(v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
-  if(v >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
-  return '$' + Math.round(v);
+  return '$' + Math.round(v).toLocaleString('en-US');  // full ticking digits below $1M
 }
 function tierFor(m){
   let name = TIERS[0][1];
@@ -364,7 +377,8 @@ let last = performance.now(), hudAt = 0, curTier = '', phase = 0;
 function frame(ts){
   const dt = Math.min(0.05, (ts - last)/1000); last = ts;
 
-  mc += (targetMc - mc) * Math.min(1, dt*2);          // smooth acceleration toward target
+  // accelerate briskly on pumps, bleed speed gradually on dips
+  mc += (targetMc - mc) * Math.min(1, dt * (targetMc >= mc ? 2 : 1.1));
   const s = speedFor(mc);
   const vis = RM ? Math.min(s, 3) : s;                // calm visuals for reduced motion
   altitude += s * 7 * dt;
