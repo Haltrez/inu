@@ -11,7 +11,7 @@ export function submissionMessage(
   ts: number,
   reason: string,
 ): string {
-  return `REASON submission\nwallet: ${wallet}\nround: ${roundId}\nts: ${ts}\nreason: ${reason}`;
+  return `REASONS submission\nwallet: ${wallet}\nround: ${roundId}\nts: ${ts}\nreason: ${reason}`;
 }
 
 /** signatureB64: base64 of the 64-byte ed25519 detached signature. */

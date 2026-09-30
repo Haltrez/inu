@@ -1,4 +1,4 @@
-# REASON — $REASON
+# REASONS — $REASONS
 
 **Give the AI one good reason.**
 
@@ -51,7 +51,7 @@ Design decisions worth knowing:
   is down across a boundary, the missed round rolls its pot forward.
 - **Holder gate runs twice** — at submission and again before payout, so you
   can't submit and dump. Even with `MIN_HOLD=0` a wallet must hold a nonzero
-  $REASON balance: the winner is always a holder.
+  $REASONS balance: the winner is always a holder.
 
 ## Repo layout
 

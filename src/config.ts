@@ -29,7 +29,7 @@ export const CONFIG = {
 
   // Solana
   rpcUrl: str("RPC_URL", "https://api.mainnet-beta.solana.com"),
-  // The $REASON mint address. Empty before launch: the holder gate is then
+  // The $REASONS mint address. Empty before launch: the holder gate is then
   // disabled so the site can run in preview mode.
   mint: str("MINT", ""),
   // Secret key of the treasury wallet — the wallet that CREATED the coin on
@@ -53,7 +53,7 @@ export const CONFIG = {
   model: str("ANTHROPIC_MODEL", "claude-opus-5-5"),
   effort: effort("ANTHROPIC_EFFORT", "high"),
 
-  dbPath: str("DB_PATH", "data/reason.db"),
+  dbPath: str("DB_PATH", "data/reasons.db"),
 };
 
 export const ROUND_MS = CONFIG.roundMinutes * 60 * 1000;

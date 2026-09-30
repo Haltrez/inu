@@ -1,9 +1,9 @@
 {
-  "name": "reason",
+  "name": "reasons",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "REASON — pump.fun creator fees, redistributed by an AI judge every 30 minutes",
+  "description": "REASONS — pump.fun creator fees, redistributed by an AI judge every 30 minutes",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",

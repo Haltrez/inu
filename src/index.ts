@@ -36,7 +36,7 @@ app.get("/api/state", async (_req, res) => {
     const roundId = currentRoundId();
     const pot = await potLamports().catch(() => 0);
     res.json({
-      ticker: "$REASON",
+      ticker: "$REASONS",
       mint: CONFIG.mint || null,
       treasury: treasury?.publicKey.toBase58() ?? null,
       roundId,
@@ -111,7 +111,7 @@ app.post("/api/submit", async (req, res) => {
 
     if (!(await isHolder(wallet))) {
       return res.status(403).json({
-        error: `You need to hold at least ${CONFIG.minHold.toLocaleString("en-US")} $REASON to enter.`,
+        error: `You need to hold at least ${CONFIG.minHold.toLocaleString("en-US")} $REASONS to enter.`,
       });
     }
 
@@ -131,7 +131,7 @@ app.post("/api/submit", async (req, res) => {
 });
 
 async function boot() {
-  console.log("REASON server starting…");
+  console.log("REASONS server starting…");
   if (!treasury) {
     console.warn(
       "[boot] TREASURY_SECRET_KEY not set — preview mode: no fee claims, no payouts.",

@@ -26,7 +26,7 @@ const Verdict = z.object({
     ),
 });
 
-const SYSTEM = `You are the judge for $REASON, a Solana memecoin experiment. Every round, holders submit one short reason why they deserve the round's pot of creator fees, and you pick the winner.
+const SYSTEM = `You are the judge for $REASONS, a Solana memecoin experiment. Every round, holders submit one short reason why they deserve the round's pot of creator fees, and you pick the winner.
 
 You will receive a JSON object: {"entries": [{"id": number, "reason": string}, ...]}.
 

@@ -40,7 +40,7 @@ export async function getMintDecimals(): Promise<number> {
   return 6; // pump.fun default
 }
 
-/** Total raw token balance an owner holds of the $REASON mint. */
+/** Total raw token balance an owner holds of the $REASONS mint. */
 export async function tokenBalanceRaw(owner: string): Promise<bigint> {
   if (!CONFIG.mint) return 0n;
   const res = await connection.getParsedTokenAccountsByOwner(
