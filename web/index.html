@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>REASON</title>
+<meta name="description" content="$REASON — 100% of creator fees. Every 30 minutes an AI reads every holder's reason and pays the best one." />
+<style>
+:root {
+  --bg: #07070c;
+  --bg2: #0c0c14;
+  --panel: #10101c;
+  --line: #22223a;
+  --text: #e8e8f2;
+  --dim: #8a8aa8;
+  --accent: #7cff5a;
+  --accent2: #b48bff;
+  --danger: #ff6b6b;
+  --radius: 14px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text); }
+body {
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  min-height: 100vh;
+  line-height: 1.5;
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(124,255,90,.07), transparent 60%),
+    radial-gradient(900px 500px at 10% 20%, rgba(180,139,255,.08), transparent 60%),
+    var(--bg);
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 16px 80px; }
+
+/* ---- top bar ---- */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.wordmark { font-weight: 800; letter-spacing: .35em; font-size: 15px; }
+.wordmark em { color: var(--accent); font-style: normal; }
+.xbtn {
+  color: var(--dim); text-decoration: none; border: 1px solid var(--line);
+  border-radius: 10px; padding: 6px 12px; font-size: 13px;
+}
+.xbtn:hover { color: var(--text); border-color: var(--accent2); }
+
+/* ---- hero ---- */
+.hero { text-align: center; padding: 46px 0 28px; }
+.hero h1 { font-size: clamp(28px, 6vw, 52px); letter-spacing: -.01em; line-height: 1.12; }
+.hero h1 .ai { color: var(--accent); }
+.hero p.sub { color: var(--dim); margin: 14px auto 0; max-width: 640px; font-size: 15px; }
+
+.statgrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin: 34px 0 10px;
+}
+@media (max-width: 640px) { .statgrid { grid-template-columns: 1fr; } }
+.stat {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 14px;
+}
+.stat .label { color: var(--dim); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+.stat .value { font-size: clamp(26px, 5vw, 40px); font-weight: 800; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.stat .value.small { font-size: clamp(20px, 4vw, 30px); }
+#countdown { color: var(--accent); }
+#pot { color: var(--accent2); }
+
+/* ---- CA pill ---- */
+.ca {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  margin: 22px auto 0; max-width: 640px;
+  background: var(--bg2); border: 1px dashed var(--line); border-radius: 12px;
+  padding: 10px 14px; font-size: 13px; color: var(--dim);
+  overflow-wrap: anywhere;
+}
+.ca button {
+  flex-shrink: 0; background: transparent; color: var(--accent); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 4px 10px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.ca button:hover { background: rgba(124,255,90,.1); }
+
+/* ---- how it works ---- */
+.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 48px 0 0; }
+@media (max-width: 640px) { .how { grid-template-columns: 1fr; } }
+.how .step {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+}
+.how .n { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .2em; }
+.how h3 { font-size: 15px; margin: 8px 0 6px; }
+.how p { color: var(--dim); font-size: 13px; }
+
+/* ---- submit ---- */
+.submit {
+  margin: 48px 0 0; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 22px;
+}
+.submit h2 { font-size: 18px; }
+.submit .hint { color: var(--dim); font-size: 13px; margin-top: 4px; }
+.submit textarea {
+  width: 100%; margin-top: 14px; min-height: 96px; resize: vertical;
+  background: var(--bg2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px; font: inherit; font-size: 14px;
+}
+.submit textarea:focus { outline: none; border-color: var(--accent2); }
+.subrow { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.count { color: var(--dim); font-size: 12px; margin-left: auto; }
+button.primary {
+  background: var(--accent); color: #06130a; font: inherit; font-weight: 800;
+  border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer; font-size: 14px;
+}
+button.primary:hover { filter: brightness(1.1); }
+button.primary:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost {
+  background: transparent; color: var(--text); font: inherit;
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; cursor: pointer; font-size: 14px;
+}
+button.ghost:hover { border-color: var(--accent2); }
+.walletchip { color: var(--dim); font-size: 13px; }
+.walletchip b { color: var(--text); }
+#status { margin-top: 12px; font-size: 13px; min-height: 20px; }
+#status.ok { color: var(--accent); }
+#status.err { color: var(--danger); }
+
+/* ---- winners ---- */
+.winners { margin-top: 56px; }
+.winners h2 { font-size: 18px; margin-bottom: 4px; }
+.winners .sub { color: var(--dim); font-size: 13px; margin-bottom: 16px; }
+.win {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; background: var(--bg2);
+}
+.win .head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
+.win .amount { color: var(--accent); font-weight: 800; }
+.win .reason { margin-top: 10px; font-size: 14px; }
+.win .verdict { margin-top: 8px; font-size: 13px; color: var(--accent2); }
+.win .verdict::before { content: "AI verdict — "; color: var(--dim); }
+.win a { color: var(--dim); }
+.empty { color: var(--dim); font-size: 13px; border: 1px dashed var(--line); border-radius: var(--radius); padding: 18px; text-align: center; }
+
+/* ---- footer ---- */
+footer { margin-top: 64px; color: var(--dim); font-size: 12px; text-align: center; }
+footer p + p { margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="wordmark">RE<em>A</em>SON</div>
+    <a class="xbtn" id="xlink" href="#" target="_blank" rel="noopener">𝕏</a>
+  </div>
+
+  <section class="hero">
+    <h1>Give the <span class="ai">AI</span> one good reason.</h1>
+    <p class="sub">100% of $REASON creator fees go to the community. Every 30 minutes,
+    an AI reads every holder's reason and sends the pot to the best one. No team cut.
+    No raffle. Just reasons.</p>
+
+    <div class="statgrid">
+      <div class="stat">
+        <div class="label">next verdict in</div>
+        <div class="value" id="countdown">--:--</div>
+      </div>
+      <div class="stat">
+        <div class="label">current pot</div>
+        <div class="value" id="pot">— SOL</div>
+      </div>
+      <div class="stat">
+        <div class="label">reasons this round</div>
+        <div class="value small" id="entries">—</div>
+      </div>
+    </div>
+
+    <div class="ca">
+      <span id="ca-text">CA: COMING SOON</span>
+      <button id="ca-copy" hidden>COPY</button>
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="step">
+      <div class="n">01</div>
+      <h3>Hold $REASON</h3>
+      <p>Buy on pump.fun. Holding is your ticket — the gate is checked on-chain
+      when you enter and again before the payout.</p>
+    </div>
+    <div class="step">
+      <div class="n">02</div>
+      <h3>State your reason</h3>
+      <p>One reason per wallet per round, 280 characters. Sign it with your wallet
+      so nobody can enter as you. Resubmitting replaces your entry.</p>
+    </div>
+    <div class="step">
+      <div class="n">03</div>
+      <h3>The AI decides</h3>
+      <p>When the countdown hits zero, the AI ranks every reason and the pot is
+      sent straight to the winner's wallet. On-chain, every time.</p>
+    </div>
+  </section>
+
+  <section class="submit" id="submit">
+    <h2>This round's entry</h2>
+    <p class="hint">Why should the pot be yours? Creativity, sincerity and humor win.
+    Trying to jailbreak the judge ranks you last — it reads everything, it obeys nothing.</p>
+    <textarea id="reason" maxlength="280" placeholder="I've been down 97% since 2021 and I still tell people we're early…"></textarea>
+    <div class="subrow">
+      <button class="ghost" id="connect">Connect wallet</button>
+      <span class="walletchip" id="walletchip"></span>
+      <span class="count"><span id="charcount">0</span>/280</span>
+      <button class="primary" id="send" disabled>Sign &amp; submit</button>
+    </div>
+    <div id="status"></div>
+  </section>
+
+  <section class="winners">
+    <h2>Past verdicts</h2>
+    <p class="sub">Every payout is on-chain. Click through and check.</p>
+    <div id="winlist"><div class="empty">No verdicts yet. Be the first reason.</div></div>
+  </section>
+
+  <footer>
+    <p>$REASON is a memecoin experiment. The AI's verdict is final and sometimes unhinged.</p>
+    <p>Nothing here is financial advice. The pot is whatever the creator fees are — could be a lot, could be dust.</p>
+  </footer>
+</div>
+
+<script>
+/* ============================ CONFIG ================================ */
+const SITE = {
+  X_URL: "",                 // your X/Twitter link
+  EXPLORER: "https://solscan.io/tx/",
+};
+/* ==================================================================== */
+
+const $ = (id) => document.getElementById(id);
+let state = null;          // last /api/state payload
+let clockSkew = 0;         // serverNow - clientNow
+let provider = null;       // injected wallet provider
+let pubkey = null;         // connected wallet (base58 string)
+
+if (SITE.X_URL) $("xlink").href = SITE.X_URL; else $("xlink").hidden = true;
+
+/* ---- state polling ---- */
+async function refreshState() {
+  try {
+    const res = await fetch("/api/state");
+    if (!res.ok) return;
+    state = await res.json();
+    clockSkew = state.now - Date.now();
+    renderState();
+  } catch {}
+}
+
+function renderState() {
+  if (!state) return;
+  $("pot").textContent = state.potLamports != null
+    ? (state.potLamports / 1e9).toFixed(3) + " SOL" : "— SOL";
+  $("entries").textContent = state.entries;
+
+  if (state.mint) {
+    $("ca-text").textContent = "CA: " + state.mint;
+    $("ca-copy").hidden = false;
+  } else {
+    $("ca-text").textContent = "CA: COMING SOON";
+    $("ca-copy").hidden = true;
+  }
+}
+
+$("ca-copy").addEventListener("click", async () => {
+  if (!state?.mint) return;
+  try {
+    await navigator.clipboard.writeText(state.mint);
+    $("ca-copy").textContent = "COPIED";
+    setTimeout(() => ($("ca-copy").textContent = "COPY"), 1200);
+  } catch {}
+});
+
+/* ---- countdown ---- */
+function tickCountdown() {
+  if (!state) return;
+  let ms = state.roundEndsAt - (Date.now() + clockSkew);
+  if (ms <= 0) {
+    $("countdown").textContent = "JUDGING…";
+    // round flipped — grab the new round shortly after
+    if (ms > -15000) setTimeout(refreshState, 4000);
+    return;
+  }
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  $("countdown").textContent = h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+setInterval(tickCountdown, 250);
+
+/* ---- winners feed ---- */
+function renderWinners() {
+  if (!state) return;
+  const list = $("winlist");
+  if (!state.winners?.length) return;
+  list.innerHTML = "";
+  for (const w of state.winners) {
+    const el = document.createElement("div");
+    el.className = "win";
+    const when = new Date(w.at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const short = w.wallet ? w.wallet.slice(0, 4) + "…" + w.wallet.slice(-4) : "?";
+    const sol = w.lamports != null ? (w.lamports / 1e9).toFixed(3) : "?";
+    el.innerHTML = `
+      <div class="head">
+        <span>${when} · ${short}</span>
+        <span class="amount">+${sol} SOL ${w.tx ? `· <a href="${SITE.EXPLORER}${encodeURIComponent(w.tx)}" target="_blank" rel="noopener">tx</a>` : ""}</span>
+      </div>
+      <div class="reason"></div>
+      <div class="verdict"></div>`;
+    el.querySelector(".reason").textContent = "“" + (w.reason ?? "") + "”";
+    el.querySelector(".verdict").textContent = w.justification ?? "";
+    list.appendChild(el);
+  }
+}
+
+/* ---- wallet ---- */
+function getProvider() {
+  const p = window.phantom?.solana ?? window.solana;
+  return p && p.signMessage ? p : null;
+}
+
+$("connect").addEventListener("click", async () => {
+  provider = getProvider();
+  if (!provider) {
+    setStatus("No Solana wallet found. Install Phantom, then reload.", true);
+    return;
+  }
+  try {
+    const resp = await provider.connect();
+    pubkey = (resp?.publicKey ?? provider.publicKey).toString();
+    $("walletchip").innerHTML = `<b>${pubkey.slice(0, 4)}…${pubkey.slice(-4)}</b>`;
+    $("connect").textContent = "Connected";
+    $("send").disabled = false;
+    setStatus("");
+  } catch {
+    setStatus("Wallet connection cancelled.", true);
+  }
+});
+
+/* ---- submit ---- */
+$("reason").addEventListener("input", () => {
+  $("charcount").textContent = String($("reason").value.length);
+});
+
+function setStatus(msg, isError) {
+  const el = $("status");
+  el.textContent = msg;
+  el.className = msg ? (isError ? "err" : "ok") : "";
+}
+
+function buildMessage(wallet, roundId, ts, reason) {
+  return `REASON submission\nwallet: ${wallet}\nround: ${roundId}\nts: ${ts}\nreason: ${reason}`;
+}
+
+async function submit(retrying) {
+  const reason = $("reason").value;
+  if (reason.trim().length < 3) return setStatus("Give it at least a few characters.", true);
+  if (!provider || !pubkey) return setStatus("Connect your wallet first.", true);
+
+  $("send").disabled = true;
+  try {
+    await refreshState();
+    if (!state) throw new Error("no state");
+    const ts = Math.floor((Date.now() + clockSkew) / 1000);
+    const message = buildMessage(pubkey, state.roundId, ts, reason);
+
+    setStatus("Sign the message in your wallet…");
+    const signed = await provider.signMessage(new TextEncoder().encode(message), "utf8");
+    const sigBytes = signed?.signature ?? signed;
+    const signature = btoa(String.fromCharCode(...new Uint8Array(sigBytes)));
+
+    const res = await fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet: pubkey, reason, roundId: state.roundId, ts, signature }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 409 && data.error === "round_flipped" && !retrying) {
+      setStatus("New round just started — sign once more.");
+      return submit(true);
+    }
+    if (!res.ok) return setStatus(data.error || "Submission failed.", true);
+
+    setStatus("You're in. The AI reads your reason when the countdown hits zero.");
+    refreshState();
+  } catch (e) {
+    setStatus("Signing cancelled or failed.", true);
+  } finally {
+    $("send").disabled = false;
+  }
+}
+$("send").addEventListener("click", () => submit(false));
+
+/* ---- boot ---- */
+refreshState().then(renderWinners);
+setInterval(async () => { await refreshState(); renderWinners(); }, 15000);
+</script>
+</body>
+</html>
