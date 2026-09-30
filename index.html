@@ -162,6 +162,8 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .rail.left li::after{left:0; right:auto}
 .rail.left .mname{font-size:11px; letter-spacing:.06em}
 .rail.left li.on .mname{text-shadow:0 0 10px rgba(89,215,255,.7)}
+.rail .rnote{font-size:9px; letter-spacing:.18em; color:var(--dim); text-transform:uppercase;
+  opacity:.8; margin-top:-6px}
 @media (min-width:960px){ .rail{display:flex} }
 
 @media (max-width:720px){
@@ -229,6 +231,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 
 <aside class="rail left" aria-label="Milestone rewards">
   <div class="rt">Rewards</div>
+  <div class="rnote">updated as we fly</div>
   <ul id="rewardList"></ul>
 </aside>
 
@@ -259,10 +262,11 @@ const TIERS = [
    Add more lines as you commit to them; they light up automatically. */
 const REWARDS = [
   [384400,  "×10 BOOST"],             // at THE MOON
-  [1.5e6,   "0.5% BUYBACK & BURN"],        // at LAGRANGE L2
-  [5.46e7,  "×30 BOOST"],             // at MARS
-  [5.88e8,  "×50 BOOST"],             // at JUPITER
-  [1.28e9,  "×100 BOOST"],            // at SATURN
+  [1.5e6,   "0.5% BURN"],                  // at LAGRANGE L2
+  [5.46e7,  "1% BURN"],                    // at MARS
+  [5.88e8,  "×30 BOOST"],             // at JUPITER
+  [1.28e9,  "×50 BOOST"],             // at SATURN
+  [4.3e9,   "×100 BOOST"],            // at NEPTUNE
   [4e13,    "×500 BOOST"],            // at PROXIMA CENTAURI — see you there
 ];
 
