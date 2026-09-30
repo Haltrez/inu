@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Effectively Accelerated Inu</title>
 <meta name="description" content="$EAI — the memecoin dog whose flight speed is a function of market cap. Higher MC, faster inu.">
+<meta name="theme-color" content="#040613">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%95%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Chakra+Petch:wght@400;600&family=Share+Tech+Mono&display=swap">
 <style>
@@ -39,13 +40,9 @@ body{
   padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 10px);
 }
 
-/* top bar */
-.bar{display:flex; align-items:center; gap:12px; font-family:var(--mono); flex:none;
-  padding-block:2px}
-.chip{border:1px solid var(--line); border-radius:999px; padding:2px 11px; flex:none;
-  color:var(--cyan); font-size:12px; letter-spacing:.08em; background:rgba(89,215,255,.06)}
-.bar .x{position:fixed; top:calc(env(safe-area-inset-top, 0px) + 12px); right:14px; z-index:3}
-a.x{display:inline-flex; align-items:center; justify-content:center;
+/* X button, pinned to the corner */
+a.x{position:fixed; top:calc(env(safe-area-inset-top, 0px) + 12px); right:14px; z-index:3;
+  display:inline-flex; align-items:center; justify-content:center;
   width:36px; height:36px; border:1px solid var(--line); border-radius:10px;
   color:var(--ink); background:var(--panel); transition:border-color .2s, color .2s, box-shadow .2s}
 a.x:hover{color:var(--hot); border-color:var(--cyan); box-shadow:0 0 18px rgba(89,215,255,.35)}
@@ -70,7 +67,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .mcnum{font-family:var(--mono); font-size:clamp(26px,4.4vw,44px); line-height:1.12;
   color:var(--hot); font-variant-numeric:tabular-nums;
   text-shadow:0 0 24px rgba(89,215,255,.6), 0 0 70px rgba(138,92,255,.35)}
-.inu-wrap{flex:1; min-height:0; width:100%; display:flex; align-items:center;
+.inu-wrap{flex:1; min-height:110px; width:100%; display:flex; align-items:center;
   justify-content:center; position:relative; will-change:transform}
 .inu-wrap img{
   display:block; height:100%; width:auto; max-width:100%; object-fit:contain;
@@ -166,6 +163,16 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   opacity:.8; margin-top:-6px}
 @media (min-width:960px){ .rail{display:flex} }
 
+/* phone fallback for the rails: one slim next-up strip */
+.nextup{display:none; grid-template-columns:1fr 1fr; gap:8px}
+.nu{border:1px solid var(--line); border-radius:9px; padding:5px 10px;
+  display:flex; flex-direction:column; gap:0; min-width:0; background:rgba(4,6,19,.45)}
+.nul{font-family:var(--mono); font-size:9px; letter-spacing:.16em; color:var(--dim);
+  text-transform:uppercase; white-space:nowrap}
+.nuv{font-family:var(--mono); font-size:11.5px; color:var(--cyan);
+  font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+@media (max-width:959px){ .nextup{display:grid} }
+
 @media (max-width:720px){
   .stats{grid-template-columns:1fr 1fr}
   .stat.wide{grid-column:1 / -1}
@@ -186,12 +193,9 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 
 <div class="shell">
 
-  <header class="bar">
-    <span class="chip" id="tickerChip">$EAI</span>
-    <a class="x" id="xTop" href="https://x.com/eacceleratedinu" target="_blank" rel="noopener" aria-label="Open our X">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-    </a>
-  </header>
+  <a class="x" id="xTop" href="https://x.com/eacceleratedinu" target="_blank" rel="noopener" aria-label="Open our X">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+  </a>
 
   <main class="scene" aria-label="Effectively Accelerated Inu">
     <h1>Effectively <span class="grad">Accelerated</span> Inu</h1>
@@ -207,6 +211,10 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   </main>
 
   <section class="console" aria-label="Flight telemetry">
+    <div class="nextup">
+      <div class="nu"><span class="nul">Next target</span><span class="nuv" id="nuTarget">—</span></div>
+      <div class="nu"><span class="nul">Next reward</span><span class="nuv" id="nuReward">—</span></div>
+    </div>
     <div class="stats">
       <div class="stat"><span class="lbl">Velocity</span><span class="val" id="velVal">1.0&times;</span></div>
       <div class="stat"><span class="lbl">Altitude</span><span class="val" id="altVal">0 km</span></div>
@@ -240,8 +248,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 const CONFIG = {
   CA: "",                        // paste the contract address here at launch; live MC kicks in automatically
   X_URL: "https://x.com/eacceleratedinu",
-  TICKER: "$EAI",
-  LAUNCH_TS: "",                 // set at launch (ISO time, e.g. "2026-10-02T18:00:00Z") — altitude counts from here, same for every visitor
+  LAUNCH_TS: "",                 // ALWAYS set together with CA (ISO time, e.g. "2026-10-02T18:00:00Z") — altitude counts from here, same for every visitor
 };
 /* =================================================================== */
 
@@ -287,18 +294,18 @@ const MILESTONES = [   // [km, name, pretty km]
 const $ = id => document.getElementById(id);
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-$('tickerChip').textContent = CONFIG.TICKER;
 $('xTop').href = CONFIG.X_URL;
 
-/* ---- market cap state ---- */
-const IDLE_MC = 2800;                     // calm pre-launch cruise until the live feed arrives
-let targetMc = IDLE_MC, mc = 0, live = false, altitude = 0;
+/* ---- market cap state ----
+   Everything sits at zero until the CA is set and DexScreener returns data;
+   then the smoothing eases him from a standstill into flight. */
+let targetMc = 0, mc = 0, live = false, altitude = 0;
 
 /* ---- synced altitude ----
    Altitude is a pure function of wall-clock time since launch and the current
    velocity, so every visitor's browser lands on the same number; each client
    only smooths toward it locally. */
-const ALT_EPOCH = Date.parse(CONFIG.LAUNCH_TS || "2026-09-30T12:00:00Z");
+const ALT_EPOCH = CONFIG.LAUNCH_TS ? Date.parse(CONFIG.LAUNCH_TS) : Date.now();
 const ALT_K = 15;                         // km/s of climb per 1x velocity
 function altTargetNow(s){ return s * ALT_K * Math.max(0, (Date.now() - ALT_EPOCH)/1000); }
 
@@ -335,10 +342,14 @@ function updateLadder(list, data){
   return idx;
 }
 
+const nuTarget = $('nuTarget'), nuReward = $('nuReward');
 let passedIdx = -1;
 function updateRail(){
   const idx = updateLadder(railList, MILESTONES);
-  updateLadder(rewardList, REWARDS);
+  const ridx = updateLadder(rewardList, REWARDS);
+  const nt = MILESTONES[idx + 1], nr = REWARDS[ridx + 1];
+  nuTarget.textContent = nt ? nt[1] + ' · ' + Math.min(99, altitude/nt[0]*100).toFixed(0) + '%' : 'BEYOND THE MAP';
+  nuReward.textContent = nr ? nr[1] + ' · ' + Math.min(99, altitude/nr[0]*100).toFixed(0) + '%' : 'ALL PAID OUT';
   if(idx > passedIdx){
     if(passedIdx !== -1 && performance.now() > 10000){   // no fireworks while catching up on page load
       pulse.classList.remove('go'); void pulse.offsetWidth; pulse.classList.add('go');
@@ -466,14 +477,14 @@ const EMITTERS = [                        // fractions of the displayed image bo
   {fx:0.40, fy:0.90, w:0.7},              // belly wash
   {fx:0.84, fy:0.62, w:0.5},              // front paw
 ];
-function spawnParts(rect, vis, dt){
-  const rate = (RM ? 5 : 16 + vis*3.4) * dt;
+function spawnParts(rect, thrust, dt){
+  const rate = (RM ? 2 : 3 + thrust*3.6) * dt;   // barely a wisp on the pad, a torrent at speed
   for(const e of EMITTERS){
     let n = rate * e.w + Math.random();
     while(n-- >= 1 && parts.length < 420){
       const jx = (Math.random()-.5) * rect.width * 0.10;
       const jy = (Math.random()-.5) * rect.height * 0.06;
-      const v = (90 + vis*60) * (0.6 + Math.random()*0.8);
+      const v = (70 + thrust*62) * (0.6 + Math.random()*0.8);
       parts.push({
         x: rect.left + rect.width*e.fx + jx,
         y: rect.top  + rect.height*e.fy + jy,
@@ -495,10 +506,10 @@ let last = performance.now(), hudAt = 0, curTier = '', phase = 0;
 function frame(ts){
   const dt = Math.min(0.05, (ts - last)/1000); last = ts;
 
-  // accelerate briskly on pumps, bleed speed gradually on dips
-  mc += (targetMc - mc) * Math.min(1, dt * (targetMc >= mc ? 2 : 1.1));
-  const s = speedFor(mc);
-  const vis = RM ? Math.min(s, 3) : s;                // calm visuals for reduced motion
+  // ease up on pumps, bleed speed gradually on dips
+  mc += (targetMc - mc) * Math.min(1, dt * (targetMc >= mc ? 1.5 : 0.9));
+  const s = live ? speedFor(mc) : 0;                  // parked at zero until the feed is live
+  const vis = Math.max(RM ? Math.min(s, 3) : s, 0.4); // faintest ambient drift while parked
   altitude += (altTargetNow(s) - altitude) * Math.min(1, dt * 0.6);  // converge on the shared altitude
 
   ctx.clearRect(0, 0, W, H);
@@ -535,7 +546,7 @@ function frame(ts){
 
   /* engine exhaust — additive plasma streaks behind the dog */
   const rect = inuImg.getBoundingClientRect();
-  spawnParts(rect, vis, dt);
+  spawnParts(rect, s, dt);
   ctx.globalCompositeOperation = 'lighter';
   for(let i = parts.length - 1; i >= 0; i--){
     const p = parts[i];
