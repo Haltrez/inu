@@ -49,10 +49,11 @@ body {
 .hero p.sub { color: var(--dim); margin: 14px auto 0; max-width: 640px; font-size: 15px; }
 
 .statgrid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
   margin: 34px 0 10px;
 }
-@media (max-width: 640px) { .statgrid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .statgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .statgrid { grid-template-columns: 1fr; } }
 .stat {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 14px;
@@ -87,6 +88,17 @@ body {
 .how .n { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .2em; }
 .how h3 { font-size: 15px; margin: 8px 0 6px; }
 .how p { color: var(--dim); font-size: 13px; }
+
+/* ---- why ---- */
+.why {
+  margin: 48px 0 0; border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 26px 24px; background: linear-gradient(180deg, rgba(180,139,255,.05), transparent);
+}
+.why h2 { font-size: 18px; margin-bottom: 12px; }
+.why p { color: var(--text); font-size: 14px; max-width: 700px; }
+.why p + p { margin-top: 12px; }
+.why p.dim { color: var(--dim); }
+.why b { color: var(--accent); }
 
 /* ---- submit ---- */
 .submit {
@@ -133,6 +145,8 @@ button.ghost:hover { border-color: var(--accent2); }
 .win .reason { margin-top: 10px; font-size: 14px; }
 .win .verdict { margin-top: 8px; font-size: 13px; color: var(--accent2); }
 .win .verdict::before { content: "AI verdict — "; color: var(--dim); }
+.win .runner { margin-top: 8px; font-size: 13px; color: var(--dim); }
+.win .runner .medal { color: var(--accent2); font-weight: 800; margin-right: 6px; }
 .win a { color: var(--dim); }
 .empty { color: var(--dim); font-size: 13px; border: 1px dashed var(--line); border-radius: var(--radius); padding: 18px; text-align: center; }
 
@@ -151,9 +165,9 @@ footer p + p { margin-top: 6px; }
 
   <section class="hero">
     <h1>Give the <span class="ai">AI</span> one good reason.</h1>
-    <p class="sub">100% of $REASON creator fees go to the community. Every 30 minutes,
-    an AI reads every holder's reason and sends the pot to the best one. No team cut.
-    No raffle. Just reasons.</p>
+    <p class="sub">100% of $REASON creator fees go back to holders. Every 30 minutes,
+    an AI reads every holder's reason and sends the pot to the best one. Holders only —
+    no team cut, no raffle. Just reasons.</p>
 
     <div class="statgrid">
       <div class="stat">
@@ -167,6 +181,10 @@ footer p + p { margin-top: 6px; }
       <div class="stat">
         <div class="label">reasons this round</div>
         <div class="value small" id="entries">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">total given away</div>
+        <div class="value small" id="totalpaid">0 SOL</div>
       </div>
     </div>
 
@@ -195,6 +213,22 @@ footer p + p { margin-top: 6px; }
       <p>When the countdown hits zero, the AI ranks every reason and the pot is
       sent straight to the winner's wallet. On-chain, every time.</p>
     </div>
+  </section>
+
+  <section class="why" id="why">
+    <h2>Why this coin exists</h2>
+    <p>The market is drowning in AI slop. Another agent framework, another
+    fake-utility chatbot coin, another roadmap written by the same model that
+    wrote the last hundred. Nobody believes the AI does anything, because it
+    doesn't.</p>
+    <p>$REASON doesn't pretend the AI is a product. Here, <b>the AI spends the
+    money</b>. 100% of creator fees flow back to holders — not to the fastest
+    sniper, not to a raffle bot — to the holder who gives the best reason.
+    Every 30 minutes the judge reads every entry and pays one of them.
+    On-chain, in public, verdict posted.</p>
+    <p><b>Only holders can win.</b> Your wallet is checked when you enter and
+    re-checked before the payout — sell your bag, lose your seat.</p>
+    <p class="dim">You don't need to be early. You need to be interesting.</p>
   </section>
 
   <section class="submit" id="submit">
@@ -255,6 +289,7 @@ function renderState() {
   $("pot").textContent = state.potLamports != null
     ? (state.potLamports / 1e9).toFixed(3) + " SOL" : "— SOL";
   $("entries").textContent = state.entries;
+  $("totalpaid").textContent = ((state.totalPaidLamports ?? 0) / 1e9).toFixed(2) + " SOL";
 
   if (state.mint) {
     $("ca-text").textContent = "CA: " + state.mint;
@@ -315,6 +350,18 @@ function renderWinners() {
       <div class="verdict"></div>`;
     el.querySelector(".reason").textContent = "“" + (w.reason ?? "") + "”";
     el.querySelector(".verdict").textContent = w.justification ?? "";
+    for (const p of w.podium ?? []) {
+      if (p.rank === 1) continue; // the winner is already the headline
+      const r = document.createElement("div");
+      r.className = "runner";
+      const medal = document.createElement("span");
+      medal.className = "medal";
+      medal.textContent = p.rank === 2 ? "2nd" : "3rd";
+      r.appendChild(medal);
+      const shortW = p.wallet.slice(0, 4) + "…" + p.wallet.slice(-4);
+      r.appendChild(document.createTextNode(`“${p.reason}” — ${shortW}`));
+      el.appendChild(r);
+    }
     list.appendChild(el);
   }
 }

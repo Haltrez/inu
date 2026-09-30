@@ -20,6 +20,14 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_submissions_round ON submissions (round_id);
 
+  CREATE TABLE IF NOT EXISTS placements (
+    round_id INTEGER NOT NULL,
+    rank     INTEGER NOT NULL, -- 1 = winner
+    wallet   TEXT    NOT NULL,
+    reason   TEXT    NOT NULL,
+    PRIMARY KEY (round_id, rank)
+  );
+
   CREATE TABLE IF NOT EXISTS rounds (
     round_id        INTEGER PRIMARY KEY,
     status          TEXT    NOT NULL, -- paid | rolled | no_entries | missed | failed
@@ -101,6 +109,40 @@ export function recordRound(r: RoundResult): void {
       (@round_id, @status, @winner_wallet, @winner_reason, @justification,
        @pot_lamports, @payout_lamports, @tx_sig, @decided_at)
   `).run(r);
+}
+
+export interface Placement {
+  round_id: number;
+  rank: number;
+  wallet: string;
+  reason: string;
+}
+
+const insertPlacementStmt = db.prepare(`
+  INSERT OR REPLACE INTO placements (round_id, rank, wallet, reason)
+  VALUES (@round_id, @rank, @wallet, @reason)
+`);
+
+export function recordPlacements(placements: Placement[]): void {
+  const insertAll = db.transaction((rows: Placement[]) => {
+    for (const row of rows) insertPlacementStmt.run(row);
+  });
+  insertAll(placements);
+}
+
+export function placementsForRound(roundId: number): Placement[] {
+  return db
+    .prepare(`SELECT * FROM placements WHERE round_id = ? ORDER BY rank ASC`)
+    .all(roundId) as Placement[];
+}
+
+export function totalPaidLamports(): number {
+  const row = db
+    .prepare(
+      `SELECT COALESCE(SUM(payout_lamports), 0) AS total FROM rounds WHERE status = 'paid'`,
+    )
+    .get() as { total: number };
+  return row.total;
 }
 
 export function recentWinners(limit: number): RoundResult[] {

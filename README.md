@@ -50,7 +50,8 @@ Design decisions worth knowing:
   don't drift and every visitor computes the same countdown. If the server
   is down across a boundary, the missed round rolls its pot forward.
 - **Holder gate runs twice** — at submission and again before payout, so you
-  can't submit and dump.
+  can't submit and dump. Even with `MIN_HOLD=0` a wallet must hold a nonzero
+  $REASON balance: the winner is always a holder.
 
 ## Repo layout
 

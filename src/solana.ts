@@ -56,11 +56,18 @@ export async function tokenBalanceRaw(owner: string): Promise<bigint> {
   return total;
 }
 
-/** True when the wallet holds at least MIN_HOLD whole tokens (gate off => true). */
+/**
+ * True when the wallet holds at least MIN_HOLD whole tokens. With the gate
+ * at 0 the wallet must still hold a nonzero balance: only holders can ever
+ * win. Pre-launch (no mint configured) everything passes for preview mode.
+ */
 export async function isHolder(owner: string): Promise<boolean> {
-  if (!CONFIG.mint || CONFIG.minHold <= 0) return true;
+  if (!CONFIG.mint) return true;
   const decimals = await getMintDecimals();
-  const required = BigInt(Math.round(CONFIG.minHold)) * 10n ** BigInt(decimals);
+  const required =
+    CONFIG.minHold > 0
+      ? BigInt(Math.round(CONFIG.minHold)) * 10n ** BigInt(decimals)
+      : 1n;
   return (await tokenBalanceRaw(owner)) >= required;
 }
 

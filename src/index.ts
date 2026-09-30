@@ -47,6 +47,7 @@ app.get("/api/state", async (_req, res) => {
       payoutPct: CONFIG.payoutPct,
       minHold: CONFIG.minHold,
       entries: store.submissionCount(roundId),
+      totalPaidLamports: store.totalPaidLamports(),
       winners: store.recentWinners(20).map((w) => ({
         roundId: w.round_id,
         wallet: w.winner_wallet,
@@ -55,6 +56,9 @@ app.get("/api/state", async (_req, res) => {
         lamports: w.payout_lamports,
         tx: w.tx_sig,
         at: w.decided_at,
+        podium: store
+          .placementsForRound(w.round_id)
+          .map((p) => ({ rank: p.rank, wallet: p.wallet, reason: p.reason })),
       })),
     });
   } catch (err) {

@@ -105,10 +105,27 @@ async function resolveRound(roundId: number): Promise<void> {
   }
   if (!winner) return rolled("no ranked entry passed the holder re-check");
 
+  // Podium for the site: winner first, then the judge's next picks.
+  const podium: store.Placement[] = [
+    { round_id: roundId, rank: 1, wallet: winner.wallet, reason: winner.reason },
+  ];
+  for (const id of verdict.ranking) {
+    if (podium.length >= 3) break;
+    const entry = byId.get(id);
+    if (!entry || entry.id === winner.id) continue;
+    podium.push({
+      round_id: roundId,
+      rank: podium.length + 1,
+      wallet: entry.wallet,
+      reason: entry.reason,
+    });
+  }
+
   // 5. Pay out.
   const payoutAmount = Math.floor((pot * CONFIG.payoutPct) / 100);
   try {
     const sig = await payout(winner.wallet, payoutAmount);
+    store.recordPlacements(podium);
     store.recordRound({
       round_id: roundId,
       status: "paid",
