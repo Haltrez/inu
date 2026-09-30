@@ -29,13 +29,6 @@ body{
   margin:0; overflow:hidden; background:var(--space); color:var(--ink);
   font-family:var(--body); font-size:15px; line-height:1.45;
 }
-body::before{ /* faint nebulae behind everything */
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(42% 34% at 12% 22%, rgba(138,92,255,.16), transparent 70%),
-    radial-gradient(50% 40% at 85% 70%, rgba(89,215,255,.10), transparent 70%),
-    radial-gradient(30% 26% at 70% 12%, rgba(138,92,255,.10), transparent 70%);
-}
 #sky{position:fixed; inset:0; z-index:0; width:100%; height:100%; pointer-events:none}
 
 .shell{
@@ -73,15 +66,27 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .tag{margin:2px 0 0; color:var(--dim); font-size:clamp(12px,1.5vw,15px); max-width:44em; flex:none}
 .tag b{color:var(--cyan); font-weight:600}
 .inu-wrap{flex:1; min-height:0; width:100%; display:flex; align-items:center;
-  justify-content:center; will-change:transform}
+  justify-content:center; position:relative; will-change:transform}
 .inu-wrap img{
   display:block; height:100%; width:auto; max-width:100%; object-fit:contain;
-  -webkit-mask-image:radial-gradient(closest-side, #000 52%, transparent 97%);
-  mask-image:radial-gradient(closest-side, #000 52%, transparent 97%);
   filter:drop-shadow(0 0 var(--glow,22px) rgba(89,215,255,.55));
-  animation:bob 4.2s ease-in-out infinite;
 }
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-.6deg)}50%{transform:translateY(-8px) rotate(.6deg)}}
+.pulse{
+  position:absolute; left:50%; top:50%; width:min(72%,430px); aspect-ratio:1; max-width:100%;
+  border:2px solid var(--cyan); border-radius:50%; pointer-events:none; opacity:0;
+  transform:translate(-50%,-50%) scale(.55);
+  box-shadow:0 0 34px rgba(89,215,255,.8), inset 0 0 34px rgba(89,215,255,.45);
+}
+.pulse.go{animation:ring .7s ease-out}
+@keyframes ring{
+  0%{opacity:.9; transform:translate(-50%,-50%) scale(.55)}
+  100%{opacity:0; transform:translate(-50%,-50%) scale(1.65)}
+}
+.val.tier.flash{animation:tf .7s ease-out}
+@keyframes tf{
+  0%{text-shadow:0 0 22px var(--cyan); color:var(--hot)}
+  100%{text-shadow:none}
+}
 
 /* console */
 .console{
@@ -134,7 +139,8 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   .console{gap:7px}
 }
 @media (prefers-reduced-motion:reduce){
-  .inu-wrap img{animation:none}
+  .pulse.go{animation:none}
+  .val.tier.flash{animation:none}
 }
 </style>
 </head>
@@ -155,7 +161,8 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
     <h1>Effectively <span class="grad">Accelerated</span> Inu</h1>
     <p class="tag">Velocity is a pure function of market cap — <b>the higher the MC, the faster he flies</b>. He does not slow down. He is not able to.</p>
     <div class="inu-wrap" id="inuWrap">
-      <img src="images/inu.jpg" alt="A shiba inu made of blue plasma, accelerating upward through deep space" width="1250" height="1250">
+      <img src="images/inu.webp" alt="A shiba inu made of blue plasma, accelerating upward through deep space" width="996" height="1000">
+      <div class="pulse" id="pulse"></div>
     </div>
   </main>
 
@@ -279,12 +286,24 @@ async function pollLive(){
 }
 pollLive();
 
-/* ---- starfield ---- */
+/* ---- starfield, nebulae, engine particles ---- */
 const cv = $('sky'), ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1;
 const DIR = (() => { const x = -0.42, y = 0.91, l = Math.hypot(x,y); return {x:x/l, y:y/l}; })(); // stars stream down-left: he flies up-right
 const COLORS = ['#ffffff','#ffffff','#9fd8ff','#59d7ff','#59d7ff','#b39bff'];
-let stars = [];
+let stars = [], blobs = [];
+
+function makeSprite(r, g, b){ // soft radial glow sprite for nebula blobs
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g2 = c.getContext('2d');
+  const gr = g2.createRadialGradient(128,128,0, 128,128,128);
+  gr.addColorStop(0, 'rgba('+r+','+g+','+b+',.5)');
+  gr.addColorStop(1, 'rgba('+r+','+g+','+b+',0)');
+  g2.fillStyle = gr; g2.fillRect(0,0,256,256);
+  return c;
+}
+const SPRITES = [makeSprite(138,92,255), makeSprite(89,215,255), makeSprite(60,90,255)];
+
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = innerWidth; H = innerHeight;
@@ -295,15 +314,52 @@ function resize(){
     x: Math.random()*W, y: Math.random()*H,
     z: 0.25 + Math.random()*0.75,
     c: COLORS[(Math.random()*COLORS.length)|0],
+    comet: Math.random() < 0.06,          // a few long warp streaks
+  }));
+  blobs = Array.from({length:6}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    z: 0.3 + Math.random()*0.7,
+    r: 180 + Math.random()*320,
+    a: 0.07 + Math.random()*0.08,
+    s: SPRITES[(Math.random()*SPRITES.length)|0],
   }));
 }
 addEventListener('resize', resize);
 resize();
 
+/* engine exhaust particles, emitted from behind his legs */
+const P_COLORS = ['#ffffff','#aef4ff','#59d7ff','#59d7ff','#8a5cff'];
+const parts = [];
+const EMITTERS = [                        // fractions of the displayed image box
+  {fx:0.26, fy:0.82, w:1.0},              // rear legs — main thrust
+  {fx:0.40, fy:0.90, w:0.7},              // belly wash
+  {fx:0.84, fy:0.62, w:0.5},              // front paw
+];
+function spawnParts(rect, vis, dt){
+  const rate = (RM ? 5 : 16 + vis*3.4) * dt;
+  for(const e of EMITTERS){
+    let n = rate * e.w + Math.random();
+    while(n-- >= 1 && parts.length < 420){
+      const jx = (Math.random()-.5) * rect.width * 0.10;
+      const jy = (Math.random()-.5) * rect.height * 0.06;
+      const v = (90 + vis*60) * (0.6 + Math.random()*0.8);
+      parts.push({
+        x: rect.left + rect.width*e.fx + jx,
+        y: rect.top  + rect.height*e.fy + jy,
+        vx: DIR.x*v + (Math.random()-.5)*26,
+        vy: DIR.y*v + (Math.random()-.5)*26,
+        life: 1, decay: 0.9 + Math.random()*1.1,
+        r: 1 + Math.random()*2.4,
+        c: P_COLORS[(Math.random()*P_COLORS.length)|0],
+      });
+    }
+  }
+}
+
 /* ---- main loop ---- */
 const mcVal = $('mcVal'), velVal = $('velVal'), tierVal = $('tierVal'), altVal = $('altVal');
-const inuWrap = $('inuWrap'), inuImg = inuWrap.querySelector('img');
-let last = performance.now(), hudAt = 0, curTier = '';
+const inuWrap = $('inuWrap'), inuImg = inuWrap.querySelector('img'), pulse = $('pulse');
+let last = performance.now(), hudAt = 0, curTier = '', phase = 0;
 
 function frame(ts){
   const dt = Math.min(0.05, (ts - last)/1000); last = ts;
@@ -313,18 +369,31 @@ function frame(ts){
   const vis = RM ? Math.min(s, 3) : s;                // calm visuals for reduced motion
   altitude += s * 7 * dt;
 
-  /* stars */
   ctx.clearRect(0, 0, W, H);
+
+  /* nebulae — slow parallax layer */
+  for(const b of blobs){
+    const sp = (5 + vis*9) * b.z * dt;
+    b.x += DIR.x * sp; b.y += DIR.y * sp;
+    if(b.y - b.r > H){ b.y = -b.r; b.x = Math.random()*W; }
+    if(b.x + b.r < 0){ b.x = W + b.r; b.y = Math.random()*H; }
+    ctx.globalAlpha = b.a;
+    ctx.drawImage(b.s, b.x - b.r, b.y - b.r, b.r*2, b.r*2);
+  }
+  ctx.globalAlpha = 1;
+
+  /* stars + warp comets */
   ctx.lineCap = 'round';
   for(const st of stars){
-    const sp = (26 + vis*46) * st.z * dt;
+    const boost = st.comet ? 2.2 : 1;
+    const sp = (26 + vis*46) * st.z * boost * dt;
     st.x += DIR.x * sp; st.y += DIR.y * sp;
     if(st.y > H+40){ st.y -= H+80; st.x = Math.random()*W; }
     if(st.x < -40){ st.x += W+80; st.y = Math.random()*H; }
-    const len = (2 + vis*2.4) * st.z;
-    ctx.globalAlpha = 0.35 + st.z*0.6;
+    const len = (2 + vis*2.4) * st.z * (st.comet ? 7 : 1);
+    ctx.globalAlpha = (st.comet ? 0.22 : 0.35) + st.z*0.55;
     ctx.strokeStyle = st.c;
-    ctx.lineWidth = st.z * 1.7;
+    ctx.lineWidth = st.z * (st.comet ? 2.1 : 1.7);
     ctx.beginPath();
     ctx.moveTo(st.x, st.y);
     ctx.lineTo(st.x - DIR.x*len, st.y - DIR.y*len);
@@ -332,12 +401,39 @@ function frame(ts){
   }
   ctx.globalAlpha = 1;
 
-  /* shake at high velocity */
-  if(!RM && s > 12){
-    const amp = Math.min(3, (s-12)/28 * 3);
-    inuWrap.style.transform = 'translate(' + ((Math.random()-.5)*amp).toFixed(2) + 'px,' + ((Math.random()-.5)*amp).toFixed(2) + 'px)';
-  } else if(inuWrap.style.transform){
-    inuWrap.style.transform = '';
+  /* engine exhaust — additive plasma streaks behind the dog */
+  const rect = inuImg.getBoundingClientRect();
+  spawnParts(rect, vis, dt);
+  ctx.globalCompositeOperation = 'lighter';
+  for(let i = parts.length - 1; i >= 0; i--){
+    const p = parts[i];
+    p.life -= p.decay * dt;
+    if(p.life <= 0){ parts.splice(i, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    const len = Math.hypot(p.vx, p.vy) * 0.07 * p.life;
+    ctx.globalAlpha = Math.min(0.7, p.life) * 0.8;
+    ctx.strokeStyle = p.c;
+    ctx.lineWidth = p.r * p.life;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x - DIR.x*len, p.y - DIR.y*len);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+
+  /* flight motion: bob accelerates with MC, forward lean, thrust shake */
+  if(!RM){
+    phase += dt * (1.6 + vis * 0.14);                 // continuous phase → smooth speed-up
+    const bobY = Math.sin(phase) * (7 + vis*0.12);
+    const wob  = Math.sin(phase*0.53) * 0.7;
+    const lean = -(vis/40) * 3.2;
+    let sx = 0, sy = 0;
+    if(s > 12){
+      const amp = Math.min(3, (s-12)/28 * 3);
+      sx = (Math.random()-.5)*amp; sy = (Math.random()-.5)*amp;
+    }
+    inuWrap.style.transform = 'translate(' + sx.toFixed(2) + 'px,' + (bobY + sy).toFixed(2) + 'px) rotate(' + (lean + wob).toFixed(2) + 'deg)';
   }
 
   /* HUD ~5×/sec */
@@ -349,8 +445,13 @@ function frame(ts){
     inuImg.style.setProperty('--glow', Math.round(16 + vis*2.4) + 'px');
     const t = tierFor(mc);
     if(t !== curTier){
+      const first = curTier === '';
       curTier = t;
       tierVal.textContent = t;
+      if(!first){                                      // shockwave on tier change
+        pulse.classList.remove('go'); void pulse.offsetWidth; pulse.classList.add('go');
+        tierVal.classList.remove('flash'); void tierVal.offsetWidth; tierVal.classList.add('flash');
+      }
     }
   }
   requestAnimationFrame(frame);
