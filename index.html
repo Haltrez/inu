@@ -131,6 +131,32 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .cabox button:disabled{color:var(--dim); cursor:default}
 .micro{margin:0; font-size:10.5px; color:var(--dim); text-align:center; flex:none}
 
+/* altitude milestones rail — desktop only, reads bottom-up like a climb */
+.rail{position:fixed; right:12px; top:50%; transform:translateY(-50%); z-index:1;
+  display:none; flex-direction:column; gap:8px; width:158px; font-family:var(--mono);
+  pointer-events:none}
+.rail .rt{font-size:10px; letter-spacing:.24em; color:var(--dim); text-transform:uppercase;
+  text-align:right}
+.rail ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column-reverse;
+  gap:7px; position:relative}
+.rail ul::before{content:""; position:absolute; right:3px; top:4px; bottom:4px; width:1px;
+  background:var(--line)}
+.rail li{display:flex; flex-direction:column; align-items:flex-end; gap:0; position:relative;
+  padding-right:14px; min-width:0}
+.rail li::after{content:""; position:absolute; right:0; top:5px; width:7px; height:7px;
+  border-radius:50%; background:var(--line)}
+.rail .mname{font-size:10px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase;
+  white-space:nowrap}
+.rail .mkm{font-size:9px; color:var(--dim); opacity:.75; font-variant-numeric:tabular-nums}
+.rail li.on .mname{color:var(--hot)}
+.rail li.on .mkm{color:var(--cyan); opacity:1}
+.rail li.on::after{background:var(--cyan); box-shadow:0 0 8px var(--cyan)}
+.rail li.next .mname{color:var(--ink)}
+.rail li.next::after{background:var(--violet); box-shadow:0 0 8px var(--violet);
+  animation:blink 1.6s infinite}
+.rail .prog{font-size:9px; color:var(--violet); font-variant-numeric:tabular-nums}
+@media (min-width:960px){ .rail{display:flex} }
+
 @media (max-width:720px){
   .stats{grid-template-columns:1fr 1fr}
   .stat.wide{grid-column:1 / -1}
@@ -155,7 +181,7 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
   <header class="bar">
     <span class="sig">Effectively&nbsp;Accelerated&nbsp;Inu</span>
     <span class="chip" id="tickerChip">$EAI</span>
-    <a class="x" id="xTop" href="https://x.com/" target="_blank" rel="noopener" aria-label="Open our X">
+    <a class="x" id="xTop" href="https://x.com/eacceleratedinu" target="_blank" rel="noopener" aria-label="Open our X">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </a>
   </header>
@@ -191,12 +217,18 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 
 </div>
 
+<aside class="rail" aria-label="Altitude milestones">
+  <div class="rt">Milestones</div>
+  <ul id="railList"></ul>
+</aside>
+
 <script>
 /* ============ CONFIG — edit these three lines at launch ============ */
 const CONFIG = {
   CA: "",                        // paste the contract address here at launch; live MC kicks in automatically
-  X_URL: "https://x.com/",       // your X profile / community link
+  X_URL: "https://x.com/eacceleratedinu",
   TICKER: "$EAI",
+  LAUNCH_TS: "",                 // set at launch (ISO time, e.g. "2026-10-02T18:00:00Z") — altitude counts from here, same for every visitor
 };
 /* =================================================================== */
 
@@ -213,6 +245,20 @@ const TIERS = [
   [1e6,      "SINGULARITY"],
 ];
 
+const MILESTONES = [   // [km, name, pretty km]
+  [1e2,     "KÁRMÁN LINE",     "100 km"],
+  [408,     "ISS ORBIT",        "408 km"],
+  [35786,   "GEO ORBIT",        "35,786 km"],
+  [384400,  "THE MOON",         "384,400 km"],
+  [1.5e6,   "LAGRANGE L2",      "1.5M km"],
+  [5.46e7,  "MARS",             "54.6M km"],
+  [5.88e8,  "JUPITER",          "588M km"],
+  [1.28e9,  "SATURN",           "1.28B km"],
+  [4.3e9,   "NEPTUNE",          "4.3B km"],
+  [2.4e10,  "VOYAGER 1",        "24B km"],
+  [4e13,    "PROXIMA CENTAURI", "40T km"],
+];
+
 const $ = id => document.getElementById(id);
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -222,6 +268,49 @@ $('xTop').href = CONFIG.X_URL;
 /* ---- market cap state ---- */
 const IDLE_MC = 2800;                     // calm pre-launch cruise until the live feed arrives
 let targetMc = IDLE_MC, mc = 0, live = false, altitude = 0;
+
+/* ---- synced altitude ----
+   Altitude is a pure function of wall-clock time since launch and the current
+   velocity, so every visitor's browser lands on the same number; each client
+   only smooths toward it locally. */
+const ALT_EPOCH = Date.parse(CONFIG.LAUNCH_TS || "2026-09-30T12:00:00Z");
+const ALT_K = 15;                         // km/s of climb per 1x velocity
+function altTargetNow(s){ return s * ALT_K * Math.max(0, (Date.now() - ALT_EPOCH)/1000); }
+
+/* milestones rail */
+const railList = $('railList');
+for(const [km, nm, pk] of MILESTONES){
+  const li = document.createElement('li');
+  li.innerHTML = '<span class="mname">' + nm + '</span><span class="mkm">' + pk + ' </span><span class="prog" hidden></span>';
+  railList.appendChild(li);
+}
+let passedIdx = -1;
+function updateRail(){
+  let idx = -1;
+  for(let i = 0; i < MILESTONES.length; i++) if(altitude >= MILESTONES[i][0]) idx = i;
+  const items = railList.children;
+  for(let i = 0; i < items.length; i++){
+    items[i].classList.toggle('on', i <= idx);
+    items[i].classList.toggle('next', i === idx + 1);
+    const prog = items[i].querySelector('.prog');
+    if(i === idx + 1){
+      prog.hidden = false;
+      prog.textContent = Math.min(99, altitude / MILESTONES[i][0] * 100).toFixed(0) + '% there';
+    } else prog.hidden = true;
+  }
+  if(idx > passedIdx){
+    if(passedIdx !== -1 && performance.now() > 10000){   // no fireworks while catching up on page load
+      pulse.classList.remove('go'); void pulse.offsetWidth; pulse.classList.add('go');
+    }
+    passedIdx = idx;
+  }
+}
+function fmtKm(v){
+  if(v >= 1e12) return (v/1e12).toFixed(2) + 'T km';
+  if(v >= 1e9)  return (v/1e9).toFixed(2) + 'B km';
+  if(v >= 1e6)  return (v/1e6).toFixed(2) + 'M km';
+  return Math.round(v).toLocaleString('en-US') + ' km';
+}
 
 const feedBadge = $('feedBadge');
 if(CONFIG.CA){ feedBadge.textContent = 'SYNCING'; feedBadge.classList.add('sync'); }
@@ -369,7 +458,7 @@ function frame(ts){
   mc += (targetMc - mc) * Math.min(1, dt * (targetMc >= mc ? 2 : 1.1));
   const s = speedFor(mc);
   const vis = RM ? Math.min(s, 3) : s;                // calm visuals for reduced motion
-  altitude += s * 7 * dt;
+  altitude += (altTargetNow(s) - altitude) * Math.min(1, dt * 0.6);  // converge on the shared altitude
 
   ctx.clearRect(0, 0, W, H);
 
@@ -443,7 +532,8 @@ function frame(ts){
     hudAt = ts;
     mcVal.textContent = live ? fmtUsd(mc) : (CONFIG.CA ? 'SYNCING…' : 'COMING SOON');
     velVal.textContent = s.toFixed(1) + '×';
-    altVal.textContent = Math.round(altitude).toLocaleString('en-US') + ' km';
+    altVal.textContent = fmtKm(altitude);
+    updateRail();
     inuImg.style.setProperty('--glow', Math.round(16 + vis*2.4) + 'px');
     const t = tierFor(mc);
     if(t !== curTier){
