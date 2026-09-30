@@ -154,6 +154,14 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 .rail li.next::after{background:var(--violet); box-shadow:0 0 8px var(--violet);
   animation:blink 1.6s infinite}
 .rail .prog{font-size:9px; color:var(--violet); font-variant-numeric:tabular-nums}
+/* rewards rail mirrors it on the left */
+.rail.left{left:12px; right:auto}
+.rail.left .rt{text-align:left}
+.rail.left ul::before{left:3px; right:auto}
+.rail.left li{align-items:flex-start; padding-left:14px; padding-right:0}
+.rail.left li::after{left:0; right:auto}
+.rail.left .mname{font-size:11px; letter-spacing:.06em}
+.rail.left li.on .mname{text-shadow:0 0 10px rgba(89,215,255,.7)}
 @media (min-width:960px){ .rail{display:flex} }
 
 @media (max-width:720px){
@@ -214,9 +222,14 @@ h1 .grad{background:linear-gradient(100deg,var(--cyan),var(--violet));
 
 </div>
 
-<aside class="rail" aria-label="Altitude milestones">
-  <div class="rt">Milestones</div>
+<aside class="rail" aria-label="Altitude targets">
+  <div class="rt">Targets</div>
   <ul id="railList"></ul>
+</aside>
+
+<aside class="rail left" aria-label="Milestone rewards">
+  <div class="rt">Rewards</div>
+  <ul id="rewardList"></ul>
 </aside>
 
 <script>
@@ -240,6 +253,17 @@ const TIERS = [
   [2.5e5,    "LIGHTSPEED"],
   [5e5,      "LUDICROUS SPEED"],
   [1e6,      "SINGULARITY"],
+];
+
+/* Rewards awarded when the flight reaches a target — [altitude km, reward].
+   Add more lines as you commit to them; they light up automatically. */
+const REWARDS = [
+  [384400,  "×10 BOOST"],             // at THE MOON
+  [1.5e6,   "0.5% BUYBACK & BURN"],        // at LAGRANGE L2
+  [5.46e7,  "×30 BOOST"],             // at MARS
+  [5.88e8,  "×50 BOOST"],             // at JUPITER
+  [1.28e9,  "×100 BOOST"],            // at SATURN
+  [4e13,    "×500 BOOST"],            // at PROXIMA CENTAURI — see you there
 ];
 
 const MILESTONES = [   // [km, name, pretty km]
@@ -281,20 +305,36 @@ for(const [km, nm, pk] of MILESTONES){
   li.innerHTML = '<span class="mname">' + nm + '</span><span class="mkm">' + pk + ' </span><span class="prog" hidden></span>';
   railList.appendChild(li);
 }
-let passedIdx = -1;
-function updateRail(){
+/* rewards rail */
+const rewardList = $('rewardList');
+for(const [km, label] of REWARDS){
+  const ms = MILESTONES.find(m => m[0] === km);
+  const at = ms ? ms[1] : fmtKm(km);
+  const li = document.createElement('li');
+  li.innerHTML = '<span class="mname">' + label + '</span><span class="mkm">at ' + at + '</span><span class="prog" hidden></span>';
+  rewardList.appendChild(li);
+}
+
+function updateLadder(list, data){
   let idx = -1;
-  for(let i = 0; i < MILESTONES.length; i++) if(altitude >= MILESTONES[i][0]) idx = i;
-  const items = railList.children;
+  for(let i = 0; i < data.length; i++) if(altitude >= data[i][0]) idx = i;
+  const items = list.children;
   for(let i = 0; i < items.length; i++){
     items[i].classList.toggle('on', i <= idx);
     items[i].classList.toggle('next', i === idx + 1);
     const prog = items[i].querySelector('.prog');
     if(i === idx + 1){
       prog.hidden = false;
-      prog.textContent = Math.min(99, altitude / MILESTONES[i][0] * 100).toFixed(0) + '% there';
+      prog.textContent = Math.min(99, altitude / data[i][0] * 100).toFixed(0) + '% there';
     } else prog.hidden = true;
   }
+  return idx;
+}
+
+let passedIdx = -1;
+function updateRail(){
+  const idx = updateLadder(railList, MILESTONES);
+  updateLadder(rewardList, REWARDS);
   if(idx > passedIdx){
     if(passedIdx !== -1 && performance.now() > 10000){   // no fireworks while catching up on page load
       pulse.classList.remove('go'); void pulse.offsetWidth; pulse.classList.add('go');
