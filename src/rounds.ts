@@ -1,15 +1,15 @@
-import { CONFIG, LAMPORTS_PER_SOL, ROUND_MS } from "./config.js";
+import { ANCHOR_MS, CONFIG, LAMPORTS_PER_SOL, ROUND_MS } from "./config.js";
 import * as store from "./db.js";
 import { judgeRound } from "./judge.js";
 import { claimCreatorFees } from "./pump.js";
 import { isHolder, payout, potLamports, treasury } from "./solana.js";
 
 export function currentRoundId(): number {
-  return Math.floor(Date.now() / ROUND_MS);
+  return Math.floor((Date.now() - ANCHOR_MS) / ROUND_MS);
 }
 
 export function roundEndsAt(roundId = currentRoundId()): number {
-  return (roundId + 1) * ROUND_MS;
+  return ANCHOR_MS + (roundId + 1) * ROUND_MS;
 }
 
 let resolving = false;

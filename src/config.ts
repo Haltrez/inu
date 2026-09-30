@@ -53,8 +53,20 @@ export const CONFIG = {
   model: str("ANTHROPIC_MODEL", "claude-opus-5-5"),
   effort: effort("ANTHROPIC_EFFORT", "high"),
 
+  // Optional ISO timestamp the round cycle is anchored to. Empty = epoch
+  // (verdicts land on :00/:30). Set it to the launch moment to restart the
+  // countdown at a full round from that instant.
+  roundAnchor: str("ROUND_ANCHOR", ""),
+
   dbPath: str("DB_PATH", "data/reasons.db"),
 };
 
 export const ROUND_MS = CONFIG.roundMinutes * 60 * 1000;
+
+export const ANCHOR_MS = (() => {
+  if (!CONFIG.roundAnchor) return 0;
+  const t = Date.parse(CONFIG.roundAnchor);
+  if (Number.isNaN(t)) throw new Error(`Invalid ROUND_ANCHOR: ${CONFIG.roundAnchor}`);
+  return t;
+})();
 export const LAMPORTS_PER_SOL = 1_000_000_000;
